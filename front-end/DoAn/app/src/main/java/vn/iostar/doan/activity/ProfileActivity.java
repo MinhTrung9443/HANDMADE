@@ -1,17 +1,24 @@
 package vn.iostar.doan.activity;
 
-import android.content.Intent; // *** Thêm import Intent ***
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;      // *** Thêm import View ***
-import android.widget.Button;   // *** Thêm import Button ***
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+// --- THÊM CÁC IMPORT CHO ACTIVITY RESULT API ---
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+// --- HẾT PHẦN IMPORT MỚI ---
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,29 +27,33 @@ import vn.iostar.doan.R;
 import vn.iostar.doan.api.ApiService;
 import vn.iostar.doan.model.Address;
 import vn.iostar.doan.model.User;
-// Bỏ import User1 nếu không dùng
-// import vn.iostar.doan.model.User1;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProfileActivity"; // *** Thêm TAG để log ***
+    private static final String TAG = "ProfileActivity";
 
     private TextView emailTextView, fullNameTextView, phoneTextView, addressTextView;
     private ImageView avatarImageView;
-    private Button orderHistoryButton; // *** Khai báo Button ***
-    // Các button khác nếu cần
+    private Button orderHistoryButton;
     private Button editProfileButton, shippingAddressButton, creditCardsButton;
 
     private String token;
-    private long currentUserId = 0L; // *** Khai báo và khởi tạo userId ***
+    private User currentUser; // Field to store the current user data
+
+    // --- Khai báo ActivityResultLauncher cho tất cả các hoạt động ---
+    private ActivityResultLauncher<Intent> editProfileLauncher;
+    private ActivityResultLauncher<Intent> shippingAddressLauncher;
+    private ActivityResultLauncher<Intent> orderHistoryLauncher; // Launcher cho Order History
+    // --- HẾT KHAI BÁO LAUNCHER ---
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile); // *** Đảm bảo tên layout đúng ***
+        setContentView(R.layout.activity_profile);
 
         token = getIntent().getStringExtra("token");
-        Log.d(TAG, "Token received: " + token); // *** Sử dụng TAG ***
+        Log.d(TAG, "Token received: " + token);
 
         // Kiểm tra token trước khi làm gì khác
         if (token == null || token.isEmpty()) {
@@ -57,64 +68,60 @@ public class ProfileActivity extends AppCompatActivity {
 
         AnhXa(); // Ánh xạ các View
 
-        // Lấy thông tin người dùng bằng token
+        // --- Register Launchers ---
+        // Edit Profile Launcher (similar to the first file's logic)
+        editProfileLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Log.d(TAG, "EditProfileLauncher callback received. ResultCode: " + result.getResultCode());
+                    if (result.getResultCode() == RESULT_OK) {
+                         Log.i(TAG, "EditProfileActivity finished with RESULT_OK. Refreshing user info.");
+                         // Re-fetch user info to update the UI with the latest data from the backend
+                         if (token != null && !token.isEmpty()) {
+                             getUserInfo(token);
+                         } else {
+                             Log.e(TAG, "Token is null during edit profile activity result. Cannot refresh user info.");
+                         }
+                    } else {
+                         Log.i(TAG, "EditProfileActivity finished with non-OK result or cancelled.");
+                    }
+                });
+
+        // Shipping Address Launcher (similar to the first file's logic)
+        shippingAddressLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Log.d(TAG, "ShippingAddressLauncher callback received. ResultCode: " + result.getResultCode());
+                    if (result.getResultCode() == RESULT_OK) {
+                        Log.i(TAG, "ShippingAddressActivity finished with RESULT_OK. Refreshing user info.");
+                        // Re-fetch user info to update the UI with the latest address info
+                        if (token != null && !token.isEmpty()) {
+                            getUserInfo(token);
+                        } else {
+                            Log.e(TAG, "Token is null during address activity result. Cannot refresh user info.");
+                        }
+
+                    } else {
+                        Log.i(TAG, "ShippingAddressActivity finished with non-OK result or cancelled.");
+                    }
+                });
+
+        // Order History Launcher
+        orderHistoryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    // Typically, Order History screen doesn't return data that affects the profile UI.
+                    // We just log the result code to confirm the activity finished.
+                    Log.d(TAG, "OrderHistoryLauncher callback received. ResultCode: " + result.getResultCode());
+                });
+
+
+
+        // Lấy thông tin người dùng bằng token sau khi đã đăng ký launchers
         getUserInfo(token);
 
-        // --- Thiết lập Listener cho nút Order History ---
-        // Đặt listener *sau khi* đã ánh xạ nút trong AnhXa()
-        orderHistoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 1. Kiểm tra xem userId có hợp lệ không (đã lấy được từ API chưa)
-                if (currentUserId <= 0) {
-                    // Người dùng chưa đăng nhập hoặc có lỗi khi lấy ID từ API
-                    Toast.makeText(ProfileActivity.this, "User information not loaded yet or invalid.", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "Order History button clicked but User ID is not valid: " + currentUserId);
-                    // Có thể thử gọi lại API getUserInfo nếu muốn
-                    // getUserInfo(token);
-                    return; // Dừng xử lý tại đây
-                }
-
-                // 2. Tạo Intent để chuyển sang OrderHistoryActivity
-                Intent intent = new Intent(ProfileActivity.this, OrderHistoryActivity.class);
-
-                // 3. Đính kèm userId vào Intent dưới dạng Extra
-                // *** QUAN TRỌNG: Sử dụng một key nhất quán (ví dụ: "user_id") ***
-                intent.putExtra("userId", currentUserId);
-                Log.d(TAG, "Starting OrderHistoryActivity with User ID: " + currentUserId);
-
-                // 4. Bắt đầu OrderHistoryActivity
-                startActivity(intent);
-            }
-        });
-
-        // --- (Tùy chọn) Thiết lập Listener cho các nút khác ---
-        editProfileButton.setOnClickListener(v -> {
-            if (currentUserId <= 0) {
-                Toast.makeText(ProfileActivity.this, "User information not available.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Toast.makeText(this, "Edit Profile Clicked", Toast.LENGTH_SHORT).show();
-            // Intent editIntent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            // editIntent.putExtra("user_id", currentUserId);
-            // startActivity(editIntent);
-        });
-
-        shippingAddressButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Shipping Address Clicked", Toast.LENGTH_SHORT).show();
-            // Intent addressIntent = new Intent(ProfileActivity.this, ShippingAddressActivity.class);
-            // addressIntent.putExtra("user_id", currentUserId);
-            // startActivity(addressIntent);
-        });
-
-        creditCardsButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Credit Cards Clicked", Toast.LENGTH_SHORT).show();
-            // Intent cardIntent = new Intent(ProfileActivity.this, CreditCardActivity.class);
-            // cardIntent.putExtra("user_id", currentUserId);
-            // startActivity(cardIntent);
-        });
-
-
+        // Thiết lập Listeners cho các nút
+        setupButtonClickListeners();
     }
 
     public void AnhXa(){
@@ -123,107 +130,178 @@ public class ProfileActivity extends AppCompatActivity {
         phoneTextView = findViewById(R.id.phoneTextView);
         addressTextView = findViewById(R.id.addressTextView);
         avatarImageView = findViewById(R.id.avatarImageView);
-        orderHistoryButton = findViewById(R.id.orderHistoryButton); // *** Ánh xạ nút Order History ***
-        // Ánh xạ các nút khác
+        orderHistoryButton = findViewById(R.id.orderHistoryButton);
         editProfileButton = findViewById(R.id.editProfileButton);
         shippingAddressButton = findViewById(R.id.shippingAddressButton);
-        creditCardsButton = findViewById(R.id.creditCardsButton);
+    }
+
+    private void setupButtonClickListeners() {
+        editProfileButton.setOnClickListener(v -> navigateToEditProfile());
+        shippingAddressButton.setOnClickListener(v -> navigateToShippingAddress());
+        orderHistoryButton.setOnClickListener(v -> navigateToOrderHistory()); // Sử dụng phương thức mới
     }
 
     private void getUserInfo(String token) {
         Log.d(TAG, "Attempting to get user info with token...");
         ApiService.apiService.getUserInfo("Bearer " + token)
-                .enqueue(new Callback<User>() { // *** Đảm bảo model User có trường ID ***
+                .enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            User user = response.body();
-                            Log.d(TAG, "User info received successfully.");
+                            currentUser = response.body(); // Store the user object
+                            Log.d(TAG, "User info received successfully. User ID: " + currentUser.getUserId()); // Log user ID
 
                             // Cập nhật giao diện người dùng
-                            updateUI(user);
+                            updateUI(currentUser);
 
                         } else {
-                            // Xử lý lỗi rõ ràng hơn
                             String errorBody = "";
                             try {
                                 if (response.errorBody() != null) errorBody = response.errorBody().string();
                             } catch (Exception e) { Log.e(TAG, "Error reading error body", e); }
                             Log.e(TAG, "Failed to get user info. Code: " + response.code() + ", Message: " + response.message() + ", Body: " + errorBody);
                             Toast.makeText(ProfileActivity.this, "Error loading profile: " + response.code(), Toast.LENGTH_SHORT).show();
-                            // Nếu lỗi 401 hoặc 403, có thể token hết hạn -> yêu cầu đăng nhập lại
-                            if (response.code() == 401 || response.code() == 403) {
-                                // Chuyển về màn hình Login
-                            }
                         }
                     }
                     @Override
                     public void onFailure(Call<User> call, Throwable t) {
-                        Log.e(TAG, "API call failed: " + t.getMessage(), t); // Log cả stacktrace
+                        Log.e(TAG, "API call failed: " + t.getMessage(), t);
                         Toast.makeText(ProfileActivity.this, "Network error. Please check connection.", Toast.LENGTH_SHORT).show();
                     }
                 });
-        // *** Bỏ phần setOnClickListener ở đây đi, đã chuyển ra onCreate ***
     }
 
     private void updateUI(User userInfo) {
-        // Kiểm tra null trước khi setText để tránh crash
-        currentUserId = userInfo.getUserId();
-        Log.d("tab", "Current User ID: " + currentUserId);
-// Hoặc đơn giản hơn nếu chỉ muốn log giá trị:
-        Log.d("tab", "" + currentUserId); // Nối với chuỗi rỗng
-        if (userInfo.getEmail() != null) {
-            emailTextView.setText(userInfo.getEmail());
-        } else {
-            emailTextView.setText("N/A"); // Hoặc để trống
+        if (userInfo == null) {
+            Log.w(TAG, "updateUI called with null userInfo.");
+            return;
         }
 
-        if (userInfo.getFullName() != null) {
-            fullNameTextView.setText(userInfo.getFullName());
-        } else {
-            fullNameTextView.setText("N/A");
-        }
+        // Lưu thông tin user vào biến currentUser
+        currentUser = userInfo;
 
-        if (userInfo.getPhone() != null) {
-            phoneTextView.setText(userInfo.getPhone());
-        } else {
-            phoneTextView.setText("N/A");
-        }
+        emailTextView.setText(userInfo.getEmail() != null ? userInfo.getEmail() : "N/A");
+        fullNameTextView.setText(userInfo.getFullName() != null ? userInfo.getFullName() : "N/A");
+        phoneTextView.setText(userInfo.getPhone() != null ? userInfo.getPhone() : "N/A");
 
-        // Xử lý địa chỉ (kiểm tra list null hoặc empty)
-        if (userInfo.getAddresses() != null && !userInfo.getAddresses().isEmpty()) {
-            StringBuilder addressBuilder = new StringBuilder();
-            // Chỉ hiển thị địa chỉ đầu tiên hoặc lặp qua nếu muốn
-            Address firstAddress = userInfo.getAddresses().get(0);
-            if (firstAddress != null) {
-                addressBuilder.append(firstAddress.getHouseNumber() != null ? firstAddress.getHouseNumber() + ", " : "")
-                        .append(firstAddress.getDistrict() != null ? firstAddress.getDistrict() + ", " : "")
-                        .append(firstAddress.getCity() != null ? firstAddress.getCity() + ", " : "")
-                        .append(firstAddress.getCountry() != null ? firstAddress.getCountry() : "");
-                // Xóa dấu phẩy và khoảng trắng thừa ở cuối nếu có
+        // --- Xử lý địa chỉ (tìm địa chỉ mặc định) ---
+        StringBuilder addressBuilder = new StringBuilder();
+        List<Address> addresses = userInfo.getAddresses();
+        Log.d(TAG, "Addresses list received. Size: " + (addresses != null ? addresses.size() : "null"));
+        Address defaultAddress = null;
+
+        if (addresses != null && !addresses.isEmpty()) {
+            for (Address address : addresses) {
+                if (address != null && address.isDefaultAddress()) {
+                    defaultAddress = address;
+                    break;
+                }
+            }
+
+            if (defaultAddress != null) {
+                 addressBuilder.append(defaultAddress.getHouseNumber() != null ? defaultAddress.getHouseNumber() + ", " : "")
+                        .append(defaultAddress.getDistrict() != null ? defaultAddress.getDistrict() + ", " : "")
+                        .append(defaultAddress.getCity() != null ? defaultAddress.getCity() + ", " : "")
+                        .append(defaultAddress.getCountry() != null ? defaultAddress.getCountry() : "");
+                // Remove trailing comma and space if any
                 if (addressBuilder.length() > 2 && addressBuilder.substring(addressBuilder.length() - 2).equals(", ")) {
                     addressBuilder.setLength(addressBuilder.length() - 2);
                 }
+                Log.d(TAG, "Default address found and displayed.");
+            } else {
+                addressBuilder.append("Chưa có địa chỉ mặc định được thiết lập.");
+                 Log.w(TAG, "No default address found among the list.");
             }
-            addressTextView.setText(addressBuilder.length() > 0 ? addressBuilder.toString() : "No address available");
+
         } else {
-            addressTextView.setText("No address available");
+            addressBuilder.append("Chưa có địa chỉ.");
+            Log.d(TAG, "Address list is null or empty.");
         }
 
-        // Load Avatar bằng Glide (kiểm tra URL null)
+        addressTextView.setText(addressBuilder.toString().trim());
+        // --- Hết xử lý địa chỉ ---
+
+
+        // Load Avatar bằng Glide
         if (userInfo.getAvatar() != null && !userInfo.getAvatar().isEmpty()) {
             Glide.with(ProfileActivity.this)
-                    .load(userInfo.getAvatar()) // URL của avatar
+                    .load(userInfo.getAvatar())
                     .placeholder(R.drawable.icon_avatar) // Ảnh mặc định khi đang load
                     .error(R.drawable.icon_avatar) // Ảnh mặc định nếu load lỗi
                     .circleCrop() // Bo tròn ảnh
                     .into(avatarImageView);
         } else {
             // Đặt ảnh mặc định nếu không có URL avatar
+            Log.d(TAG, "updateUI - Avatar URL is null or empty, setting default image.");
             Glide.with(ProfileActivity.this)
                     .load(R.drawable.icon_avatar)
                     .circleCrop()
                     .into(avatarImageView);
         }
     }
+
+    // --- Các phương thức điều hướng sử dụng Launcher ---
+
+    private void navigateToEditProfile() {
+        // Check if user data is loaded before attempting to pass it
+        if (currentUser == null) {
+            Toast.makeText(this, "User information not loaded yet.", Toast.LENGTH_SHORT).show();
+            Log.w(TAG, "navigateToEditProfile called but currentUser is null.");
+            return;
+        }
+        if (token == null || token.isEmpty()) {
+             Toast.makeText(this, "Authentication error, cannot edit profile.", Toast.LENGTH_SHORT).show();
+             Log.w(TAG, "navigateToEditProfile called but token is null or empty.");
+             return;
+        }
+
+        Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+        // Pass current info to the edit screen
+        intent.putExtra("CURRENT_FULL_NAME", currentUser.getFullName());
+        intent.putExtra("CURRENT_PHONE", currentUser.getPhone());
+        intent.putExtra("CURRENT_AVATAR_URL", currentUser.getAvatar()); // Pass current avatar URL
+        intent.putExtra("TOKEN", token); // Pass token needed for the PUT request in EditProfileActivity
+
+        Log.i(TAG, "Launching EditProfileActivity using launcher...");
+        editProfileLauncher.launch(intent);
+    }
+
+    private void navigateToShippingAddress() {
+         if (token == null || token.isEmpty()) {
+             Toast.makeText(this, "Authentication error, cannot view addresses.", Toast.LENGTH_SHORT).show();
+             Log.w(TAG, "navigateToShippingAddress called but token is null or empty.");
+             return;
+         }
+         // Passing currentUser object might be better if ShippingAddressActivity needs the whole user structure
+         // but passing just the token is often sufficient if the address activity fetches data based on token.
+         Intent intent = new Intent(ProfileActivity.this, ShippingAddressActivity.class);
+         intent.putExtra("TOKEN", token); // Pass the token to the address activity
+
+         Log.i(TAG, "Launching ShippingAddressActivity using launcher...");
+         shippingAddressLauncher.launch(intent);
+    }
+
+    private void navigateToOrderHistory() {
+        // Check if user data is loaded and user ID is valid
+        if (currentUser == null || currentUser.getUserId() <= 0) {
+            Toast.makeText(this, "User information not loaded yet or invalid.", Toast.LENGTH_SHORT).show();
+            Log.w(TAG, "navigateToOrderHistory called but currentUser or User ID is invalid: " + (currentUser != null ? currentUser.getUserId() : "null"));
+            return;
+        }
+         if (token == null || token.isEmpty()) {
+             Toast.makeText(this, "Authentication error, cannot view order history.", Toast.LENGTH_SHORT).show();
+             Log.w(TAG, "navigateToOrderHistory called but token is null or empty.");
+             return;
+         }
+
+        Intent intent = new Intent(ProfileActivity.this, OrderHistoryActivity.class);
+        // Pass user ID and token to the order history screen
+        intent.putExtra("userId", currentUser.getUserId());
+        intent.putExtra("token", token); // Pass token if OrderHistoryActivity needs it for API calls
+
+        Log.i(TAG, "Launching OrderHistoryActivity using launcher with User ID: " + currentUser.getUserId());
+        orderHistoryLauncher.launch(intent); // Use the Order History launcher
+    }
+
+
 }

@@ -98,7 +98,7 @@ public class ProductRatingActivity extends AppCompatActivity {
             currentUserId = getIntent().getLongExtra("user_id", 0L);
             Log.i(TAG, "User ID received from Intent: " + currentUserId);
         } else {
-            currentUserId = SharedPreferencesUtils.getLong(this, "userId", 0L);
+            currentUserId = SharedPreferencesUtils.getLong(this, "user_id", 0L);
             Log.i(TAG, "User ID retrieved from SharedPreferences: " + currentUserId + " (as fallback or if not passed via Intent)");
         }
 
@@ -456,17 +456,39 @@ public class ProductRatingActivity extends AppCompatActivity {
     }
 
     private void sendCommentData(String text, int rating, String imageUrl) {
-        Log.d(TAG, "Sending comment DTO - Text: " + text + ", Rating: " + rating + ", ImageUrl: " + imageUrl + ", UserID: " + currentUserId + ", ProductID: " + productId);
-        CommentRequest requestBody = new CommentRequest(text, rating, imageUrl, productId, currentUserId);
+        Log.d(TAG, "Preparing to send: Text=" + text + ", Rating=" + rating + ", ImageUrl=" + imageUrl + ", UserID=" + currentUserId + ", ProductID=" + productId);
+
+        String authToken = SharedPreferencesUtils.getString(this, "token", null);
+
+        if (authToken == null || authToken.isEmpty()) {
+            showLoading(false);
+            Toast.makeText(this, "Vui lòng đăng nhập để bình luận.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Cannot send comment: Auth token is missing.");
+            updateSendButtonState();
+            return;
+        }
+        String authHeader = "Bearer " + authToken;
+
+        // === TẠO REQUEST BODY - SỬA THỨ TỰ ĐỐI SỐ CUỐI CÙNG ===
+        // Constructor là: CommentRequest(String content, int rating, String image, long userId, long productId)
+        // Phải truyền: currentUserId (cho userId) và productId (cho productId)
+        CommentRequest requestBody = new CommentRequest(text, rating, imageUrl, currentUserId, productId); // <--- SỬA Ở ĐÂY! currentUserId TRƯỚC, productId SAU
+
+        // Log the values *in* the object after setting them (Optional but good for debugging)
+        Log.d(TAG, "CommentRequest object values after constructor: userId=" + requestBody.getUserId() + ", productId=" + requestBody.getProductId());
+
+
         cancelCall(createCommentCall);
-        createCommentCall = ApiService.apiService.createComment(requestBody);
+
+        // === GỌI API VÀ TRUYỀN HEADER XÁC THỰC ===
+        // Đảm bảo phương thức createComment trong ApiService interface CÓ @Header("Authorization")
+        createCommentCall = ApiService.apiService.createComment(authHeader, requestBody);
+
         createCommentCall.enqueue(new Callback<Comment>() {
             @Override
             public void onResponse(@NonNull Call<Comment> call, @NonNull Response<Comment> response) {
-                if (isFinishing() || isDestroyed()) {
-                    Log.w(TAG, "sendCommentData onResponse: Activity is finishing/destroyed. Ignoring callback.");
-                    return;
-                }
+                // ... (phần xử lý response) ...
+                if (isFinishing() || isDestroyed()) return;
                 showLoading(false);
                 if (response.isSuccessful() && response.body() != null) {
                     Log.i(TAG, "Comment created successfully! ID: " + response.body().getCommentId());
@@ -480,21 +502,28 @@ public class ProductRatingActivity extends AppCompatActivity {
                     String errorBody = "";
                     try { if (response.errorBody() != null) errorBody = response.errorBody().string(); } catch (Exception e) { /* ignore */ }
                     Log.e(TAG, "Create Comment Error Body: " + errorBody);
-                    Toast.makeText(ProductRatingActivity.this, "Failed to submit review: " + response.code(), Toast.LENGTH_LONG).show();
+
+                    String userFriendlyError = "Failed to submit review: " + response.code();
+                    if (response.code() == 401 || response.code() == 403) {
+                        userFriendlyError = "Bạn không có quyền thực hiện thao tác này. Vui lòng đăng nhập lại.";
+                    } else if (response.code() == 400) {
+                        userFriendlyError = "Dữ liệu gửi đi không hợp lệ."; // Hoặc parse errorBody chi tiết hơn
+                    } else if (!errorBody.isEmpty()) {
+                        userFriendlyError += " - " + errorBody.substring(0, Math.min(errorBody.length(), 100));
+                    }
+                    Toast.makeText(ProductRatingActivity.this, userFriendlyError, Toast.LENGTH_LONG).show();
                 }
                 updateSendButtonState();
             }
             @Override
             public void onFailure(@NonNull Call<Comment> call, @NonNull Throwable t) {
-                if (isFinishing() || isDestroyed()) {
-                    Log.w(TAG, "sendCommentData onFailure: Activity is finishing/destroyed. Ignoring callback.");
-                    return;
-                }
+                // ... (phần xử lý failure) ...
+                if (isFinishing() || isDestroyed()) return;
                 if (call.isCanceled()) {
-                    Log.d(TAG, "sendCommentData onFailure: Call was cancelled.");
+                    Log.d(TAG, "Create comment call was cancelled.");
                 } else {
                     Log.e(TAG, "Create comment NETWORK failure: " + t.getMessage(), t);
-                    Toast.makeText(ProductRatingActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProductRatingActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 showLoading(false);
                 updateSendButtonState();

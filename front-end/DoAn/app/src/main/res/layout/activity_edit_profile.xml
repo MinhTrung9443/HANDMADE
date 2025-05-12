@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".activity.EditProfileActivity">
+
+    <ImageView
+        android:id="@+id/editAvatarImageView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="32dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image_62"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Select Avatar"
+        android:clickable="true"
+        android:focusable="true" />
+    <!-- Make ImageView clickable -->
+
+    <TextView
+        android:id="@+id/textViewClickToChange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nhấn vào ảnh đại diện để thay đổi"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/editAvatarImageView"
+        app:layout_constraintStart_toStartOf="@id/editAvatarImageView"
+        app:layout_constraintEnd_toEndOf="@id/editAvatarImageView"
+        android:layout_marginTop="4dp"/>
+
+    <!-- Removed the separate "Upload Image" TextView -->
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/fullNameInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/textViewClickToChange"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/editFullNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Họ và tên"
+        android:inputType="textPersonName" />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+
+<com.google.android.material.textfield.TextInputLayout
+android:id="@+id/phoneInputLayout"
+style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:layout_marginTop="16dp"
+app:layout_constraintTop_toBottomOf="@id/fullNameInputLayout"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent">
+
+<com.google.android.material.textfield.TextInputEditText
+    android:id="@+id/editPhoneEditText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="Số điện thoại"
+    android:inputType="phone" />
+
+</com.google.android.material.textfield.TextInputLayout>
+
+<Button
+android:id="@+id/saveProfileButton"
+android:layout_width="0dp"
+android:layout_height="wrap_content"
+android:layout_marginTop="32dp"
+android:text="Lưu thay đổi"
+app:layout_constraintTop_toBottomOf="@id/phoneInputLayout"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"/>
+
+<ProgressBar
+android:id="@+id/progressBar"
+style="?android:attr/progressBarStyle"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:visibility="gone"
+tools:visibility="visible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

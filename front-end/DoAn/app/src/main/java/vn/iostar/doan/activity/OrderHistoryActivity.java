@@ -42,7 +42,7 @@ public class OrderHistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_history);
-        currentUserId = getIntent().getLongExtra("user_id", currentUserId); // *** Dùng đúng key "user_id" ***
+        currentUserId = getIntent().getLongExtra("userId", currentUserId); // *** Dùng đúng key "user_id" ***
 
         // Kiểm tra xem userId có hợp lệ không
         if (currentUserId <= 0) {

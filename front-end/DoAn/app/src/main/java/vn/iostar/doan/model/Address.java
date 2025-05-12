@@ -1,13 +1,39 @@
 package vn.iostar.doan.model;
 
-public class Address  {
-    private long addressId;
-    private String houseNumber;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
+public class Address  implements Serializable{
+    @SerializedName("addressId")
+    private Long addressId;
+
+    @SerializedName("recipientName")
+    private String fullName;
+
+    @SerializedName("recipientPhone")
+    private String phone;
+
+    @SerializedName("streetAddress")
+    private String houseNumber; // Or streetAddress
+
+    @SerializedName("ward")
+    private String ward; // Added based on typical address structures
+
+    @SerializedName("district")
     private String district;
-    private String city;
+
+    @SerializedName("city")
+    private String city; // Or province
+
+    @SerializedName("country")
     private String country;
+
+    @SerializedName("default")
+    private boolean isDefaultAddress;
     private User1 user;
 
+    // Constructor (optional, good for creating new ones)
     public Address() {
     }
 
@@ -20,13 +46,29 @@ public class Address  {
         this.user = user;
     }
 
-    // Getter và Setter
-    public long getAddressId() {
+    // Getters and Setters
+    public Long getAddressId() {
         return addressId;
     }
 
-    public void setAddressId(long addressId) {
+    public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getHouseNumber() {
@@ -35,6 +77,14 @@ public class Address  {
 
     public void setHouseNumber(String houseNumber) {
         this.houseNumber = houseNumber;
+    }
+
+    public String getWard() {
+        return ward;
+    }
+
+    public void setWard(String ward) {
+        this.ward = ward;
     }
 
     public String getDistrict() {
@@ -61,11 +111,43 @@ public class Address  {
         this.country = country;
     }
 
-    public User1 getUser() {
-        return user;
+    public boolean isDefaultAddress() {
+        return isDefaultAddress;
     }
 
-    public void setUser(User1 user) {
-        this.user = user;
+    public void setDefaultAddress(boolean defaultAddress) {
+        isDefaultAddress = defaultAddress;
+    }
+
+    // Helper method to get a displayable address string
+    public String getFullAddressString() {
+        StringBuilder sb = new StringBuilder();
+        if (houseNumber != null && !houseNumber.isEmpty()) sb.append(houseNumber).append(", ");
+        if (ward != null && !ward.isEmpty()) sb.append(ward).append(", ");
+        if (district != null && !district.isEmpty()) sb.append(district).append(", ");
+        if (city != null && !city.isEmpty()) sb.append(city);
+        if (country != null && !country.isEmpty() && sb.length() > 0) sb.append(", ").append(country); // Add country only if city exists
+
+        // Remove trailing comma and space if any
+        String fullAddress = sb.toString().trim();
+        if (fullAddress.endsWith(",")) {
+            fullAddress = fullAddress.substring(0, fullAddress.length() - 1).trim();
+        }
+        return fullAddress.isEmpty() ? "Địa chỉ chưa hoàn chỉnh" : fullAddress;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "addressId=" + addressId +
+                ", fullName='" + fullName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", houseNumber='" + houseNumber + '\'' +
+                ", ward='" + ward + '\'' +
+                ", district='" + district + '\'' +
+                ", city='" + city + '\'' +
+                ", country='" + country + '\'' +
+                ", isDefaultAddress=" + isDefaultAddress +
+                '}';
     }
 }

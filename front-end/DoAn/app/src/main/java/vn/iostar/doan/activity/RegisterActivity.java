@@ -35,7 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnRegister = findViewById(R.id.btnRegister);
         tvLogin = findViewById(R.id.tvLogin);
-        googleSignIn = findViewById(R.id.googleSignIn);
+        googleSignIn = findViewById(R.id.btnGoogleSignIn); // Corrected ID
 
         // Xử lý sự kiện khi nhấn nút Đăng ký
         btnRegister.setOnClickListener(v -> {

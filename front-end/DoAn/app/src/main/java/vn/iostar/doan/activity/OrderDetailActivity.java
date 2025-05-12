@@ -40,6 +40,7 @@ import vn.iostar.doan.fragment.OrderListFragment; // Để dùng hằng ACTION_S
 import vn.iostar.doan.model.Order;
 import vn.iostar.doan.model.OrderLine;
 import vn.iostar.doan.model.OrderStatus;
+import vn.iostar.doan.model.Product;
 import vn.iostar.doan.model.Product2;
 
 public class OrderDetailActivity extends AppCompatActivity {
@@ -210,7 +211,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             LayoutInflater inflater = LayoutInflater.from(this);
             for (int i = 0; i < order.getOrderLines().size(); i++) {
                 OrderLine line = order.getOrderLines().get(i);
-                Product2 product = line.getProduct(); // Model Product2
+                Product product = line.getProduct(); // Model Product2
 
                 View itemView = inflater.inflate(R.layout.list_item_order_detail_product, llOrderDetailItems, false);
                 ImageView ivProduct = itemView.findViewById(R.id.iv_product_image_detail);
@@ -223,7 +224,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                     tvName.setText(product.getName());
                     // Giả định Product2 có getImageUrl() trả về URL ảnh
                     Glide.with(this)
-                            .load(product.getImageUrl())
+                            .load(product.getImages())
                             .placeholder(R.drawable.placeholder_image)
                             .error(R.drawable.error_image)
                             .into(ivProduct);

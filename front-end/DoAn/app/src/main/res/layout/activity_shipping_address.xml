@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground"
+    tools:context=".activity.ShippingAddressActivity">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="Địa chỉ giao hàng"
+            app:titleTextColor="?attr/colorOnPrimary"
+            app:navigationIcon="@drawable/ic_back"
+            app:tint="?attr/colorOnPrimary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- "Add New Address" Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/addNewAddressButton"
+        style="@style/Widget.App.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_medium"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:layout_marginEnd="@dimen/margin_medium"
+        android:text="+ Thêm địa chỉ mới"
+        app:icon="@drawable/ic_plus"
+        app:iconTint="?attr/colorPrimary"
+        android:textColor="?attr/colorPrimary"/>
+
+    <!-- Address List Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Địa chỉ đã lưu của bạn"
+        android:layout_marginStart="@dimen/margin_medium"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:layout_marginEnd="@dimen/margin_medium"
+        android:textAppearance="@style/TextAppearance.App.TitleSmall"
+        android:textColor="?attr/colorOnBackground"
+        android:textStyle="bold"/>
+
+    <!-- Address List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/addressesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:paddingStart="@dimen/padding_medium"
+        android:paddingEnd="@dimen/padding_medium"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/padding_medium"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_address" />
+
+    <!-- Empty State -->
+    <TextView
+        android:id="@+id/noAddressesTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Không tìm thấy địa chỉ nào."
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.App.BodyMedium"
+        android:textColor="?attr/colorOnBackground"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/spacing_large"/>
+
+</LinearLayout>

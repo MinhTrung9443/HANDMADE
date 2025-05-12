@@ -44,7 +44,7 @@ public class ChatActivity extends AppCompatActivity { // Phải kế thừa từ
 
     private static final String TAG = "ChatActivity";
     // ***** Đảm bảo URL này đúng với địa chỉ IP và cổng backend của bạn *****
-    private static final String API_BASE_URL = "http://192.168.1.7:8080/";
+    private static final String API_BASE_URL = "http://10.0.2.2:8080/";
     private static final String CHAT_ENDPOINT = "api/chat";
 
     private RecyclerView recyclerViewMessages;

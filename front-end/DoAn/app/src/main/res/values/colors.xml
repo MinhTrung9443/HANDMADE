@@ -1,21 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="divider_color">#E0E0E0</color> <!-- Màu xám nhạt -->
+    <!-- Material Design Color Roles -->
+    <color name="colorPrimary">#6200EE</color> <!-- Example Primary Color (Purple) -->
+    <color name="colorOnPrimary">#FFFFFF</color> <!-- Color for text/icons on primary -->
+    <color name="colorSecondary">#03DAC6</color> <!-- Example Secondary Color (Teal) -->
+    <color name="colorOnSecondary">#000000</color> <!-- Color for text/icons on secondary -->
+    <color name="colorSurface">#FFFFFF</color> <!-- Color for surfaces like cards, dialogs -->
+    <color name="colorOnSurface">#000000</color> <!-- Color for text/icons on surface -->
+    <color name="colorBackground">#F0F0F0</color> <!-- Color for main screen background -->
+    <color name="colorOnBackground">#000000</color> <!-- Color for text/icons on background -->
+    <color name="colorError">#B00020</color> <!-- Material Design default error color -->
+    <color name="colorOnError">#FFFFFF</color> <!-- Color for text/icons on error -->
+<!--    my_orange_processing-->
+    <!-- Existing Colors (Mapped or Refined) -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="pink">#FFC0CB</color>
-    <color name="blue">#2196F3</color>
     <color name="gray">#808080</color>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="grey_400">#BDBDBD</color>
-    <color name="yellow_500">#FFEB3B</color>
-    <color name="my_red_error">#F44336</color>  <!-- Màu đỏ cho lỗi -->
-    <color name="my_grey_neutral">#9E9E9E</color> <!-- Màu xám cho trạng thái mặc định -->
-    <color name="my_green_success">#4CAF50</color> <!-- Màu xanh lá cho thành công (ví dụ: RECEIVED) -->
-    <color name="my_orange_processing">#FF9800</color>
-    <color name="yellow">#FFD700</color>
+    <color name="divider_color">#E0E0E0</color> <!-- Light gray for dividers -->
+
+    <!-- State Colors (Refined) -->
+    <color name="status_success">#4CAF50</color> <!-- Green for success -->
+    <color name="status_processing">#FF9800</color> <!-- Orange for processing -->
+    <color name="status_error">#F44336</color> <!-- Red for errors (can map to colorError) -->
+    <color name="status_neutral">#9E9E9E</color> <!-- Gray for neutral states -->
+
+    <!-- Other potentially used colors (review and remove if not needed) -->
+    <!-- <color name="pink">#FFC0CB</color> -->
+    <!-- <color name="blue">#2196F3</color> -->
+    <!-- <color name="yellow">#FFD700</color> -->
+    <color name="red">#F45000</color>
+    <color name="my_red_error">#F44336</color> <!-- Using Material Design error color -->
+    <color name="my_green_success">#4CAF50</color> <!-- Using Material Design success color -->
+    <color name="purple_700">#7B1FA2</color> <!-- A shade of purple -->
+    <color name="my_grey_neutral">#9E9E9E</color> <!-- Using the existing status_neutral color -->
+    <color name="my_orange_processing">#FF9800</color> <!-- Orange for processing -->
+
+    <!-- <color name="grey_dark">#616161</color> -->
+    <!-- <color name="grey_darker">#424242</color> -->
+
 </resources>

@@ -1,75 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:background="#F5F5DC"
+    tools:context=".activity.AboutUsActivity">
 
-        <!-- Ảnh nền -->
-        <ImageView
-            android:id="@+id/imageView7"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/image_51"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Khối nội dung -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="500dp"
-            android:alpha="0.7"
-            android:background="@color/black"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0">
-
-                <!-- Tiêu đề -->
-                <TextView
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+                <ImageButton
+                    android:id="@+id/btn_back"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="serif"
-                    android:gravity="left"
-                    android:paddingTop="8dp"
-                    android:text="Support the local community."
-                    android:textColor="@color/white"
-                    android:textSize="50sp"
-                    android:textStyle="italic" />
+                    android:src="@drawable/ic_back"
+                    android:contentDescription="Back button"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"/>
 
-                <!-- Đường kẻ -->
-                <View
+
+                <!-- Section: Nhóm Phát Triển (Không dùng CardView) -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="12dp"
-                    android:background="@color/gray" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rounded_background"> <!-- Optional: Add a subtle background or border if desired -->
 
-                <!-- Nội dung văn bản -->
+                        <TextView
+                            android:id="@+id/tv_section_team_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Nhóm Phát Triển"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            android:textColor="?attr/colorPrimaryDark"
+                            android:layout_marginBottom="16dp"/>
+
+                        <!-- Member 1 (Vertical Layout) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal"
+                            android:layout_marginBottom="12dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:padding="8dp">
+
+                                <com.google.android.material.imageview.ShapeableImageView
+                                    android:layout_width="200dp"
+                                    android:layout_height="200dp"
+                                    android:src="@drawable/avt1"
+                                    android:scaleType="centerCrop"
+                                    android:contentDescription="Avatar Thành viên 1"
+                                    android:layout_marginBottom="8dp"
+                                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircularImageView"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:gravity="center_horizontal">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Nguyễn Thị Hồng Nhung"
+                                            android:textAppearance="?attr/textAppearanceBody1"
+                                            android:textStyle="bold"
+                                            android:textColor="?attr/colorOnSurface"/>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="MSSV: 22110391"
+                                            android:textAppearance="?attr/textAppearanceBody2"
+                                            android:textColor="?attr/colorOnSurface"
+                                            android:alpha="0.8"/>
+                                </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Member 2 (Vertical Layout) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:padding="8dp">
+
+                                <com.google.android.material.imageview.ShapeableImageView
+                                    android:layout_width="200dp"
+                                    android:layout_height="200dp"
+                                    android:src="@drawable/avt2"
+                                    android:scaleType="centerCrop"
+                                    android:contentDescription="Avatar Thành viên 2"
+                                    android:layout_marginBottom="8dp"
+                                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircularImageView"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:gravity="center_horizontal">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Liên Huệ Tiên"
+                                            android:textAppearance="?attr/textAppearanceBody1"
+                                            android:textStyle="bold"
+                                            android:textColor="?attr/colorOnSurface"/>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="MSSV: 22110433"
+                                            android:textAppearance="?attr/textAppearanceBody2"
+                                            android:textColor="?attr/colorOnSurface"
+                                            android:alpha="0.8"/>
+                                </LinearLayout>
+                        </LinearLayout>
+                </LinearLayout>
+
+                <!-- Section: Giảng Viên Hướng Dẫn (Không dùng CardView) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp"
+                    android:padding="16dp"
+                    android:background="@drawable/rounded_background"> <!-- Optional: Add a subtle background or border if desired -->
+
+                        <TextView
+                            android:id="@+id/tv_section_instructor_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Giảng Viên Hướng Dẫn"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            android:textColor="?attr/colorPrimaryDark"
+                            android:layout_marginBottom="16dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:padding="8dp">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_teacher"
+                                    android:contentDescription="Icon Instructor"
+                                    android:layout_marginEnd="16dp"
+                                    app:tint="?attr/colorAccent"/>
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Th.S Nguyễn Hữu Trung"
+                                    android:textAppearance="?attr/textAppearanceBody1"
+                                    android:textColor="?attr/colorOnSurface"/>
+                        </LinearLayout>
+                </LinearLayout>
+
+                <!-- Additional Info (e.g., Version) -->
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tv_version_info"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Small businesses and shops have always been the backbone of the Vietnam economy. During the pandemic around 40 million small business owners suffered from strict lockdown norms.
-\n\nYet, there is a silver lining that brought in optimism as the country unlocked slowly. Indian consumers pivoted their purchase patterns, preferring local small businesses, independent stores, and local restaurants, which need their patronage.\n"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/btn_next"
-                    android:layout_width="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="16dp"
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    android:textColor="?attr/colorOnBackground"
+                    android:text="Phiên bản 1.0"
+                    tools:ignore="SmallSp" />
+                <include
+                    android:id="@+id/bottom_navigation"
+                    layout="@layout/bottom_nav_menu"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:gravity="center"
-                    android:text="Next"
-                    android:textColor="@color/black"
-                    android:backgroundTint="@color/white"
-                    android:textSize="20dp" />
-
-
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
         </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
