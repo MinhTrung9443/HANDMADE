@@ -7,7 +7,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,16 +33,39 @@ public class Address {
 	 @Id
 	 @GeneratedValue(strategy = GenerationType.IDENTITY)
 	 private long addressId;
-	 private String houseNumber;
-	 private String district;
-	 private String city;
-	 private String country;
 	 
-	 @ManyToOne
-	 @JoinColumn(name = "user_id")
-	 @JsonBackReference
-	 @ToString.Exclude
-	 private User user;
+	 	@Column(nullable = true) 
+	    private String recipientName; 
+
+	    @Column(nullable = true) 
+	    private String recipientPhone; 
+
+	    @Column(nullable = true) 
+	    private String streetAddress;
+
+	    @Column(nullable = true) 
+	    private String ward; 
+
+	    @Column(nullable = false)
+	    private String district;
+
+	    @Column(nullable = false) 
+	    private String city;    
+
+	    @Column(nullable = true) 
+	    private String country;
+
+	    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+	    private boolean isDefault = false; 
+
+	    @ManyToOne(fetch = FetchType.LAZY) 
+	    @JoinColumn(name = "user_id", nullable = false)
+	    @JsonBackReference 
+	    @ToString.Exclude 
+	    private User user;
+
+	    @Column(nullable = true)
+	    private String goongPlaceId;
 
 
 }

@@ -20,7 +20,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign up"
+            android:text="Đăng ký"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -40,7 +40,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Fullname">
+                    android:hint="Họ và tên">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etFullname"
@@ -67,7 +67,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Password">
+                    android:hint="Mật khẩu">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"

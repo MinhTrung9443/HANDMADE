@@ -1,51 +1,47 @@
 package vn.iostar.Project_Mobile.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString; // Thêm import này nếu chưa có
+import lombok.ToString;
 import vn.iostar.Project_Mobile.util.OrderStatus;
 import vn.iostar.Project_Mobile.util.PaymentMethod;
-// import vn.iostar.Project_Mobile.entity.User; // Đã có trong @ManyToOne
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "orders") // Đảm bảo tên bảng này khớp với database của bạn
-@ToString(exclude = {"user", "orderLines"}) // Giữ nguyên để tránh vòng lặp khi toString
+@Table(name = "orders")
+@ToString(exclude = {"user", "orderLines"})  
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id") // Thêm @Column nếu tên cột khác orderId
+    @Column(name = "order_id") 
     private long orderId;
 
-    // THÊM TRƯỜNG ITEMS_SUBTOTAL Ở ĐÂY
-    @Column(name = "items_subtotal") // Quan trọng: Ánh xạ tới cột 'items_subtotal' trong DB
-    private Double itemsSubtotal;    // Sử dụng Double cho giá trị tiền tệ
+    @Column(name = "items_subtotal", nullable = false) 
+    private Double itemsSubtotal;   
 
-    @Column(name = "total_price") // Thêm @Column nếu tên cột khác totalPrice
+    @Column(name = "total_price") 
     private double totalPrice;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "order_date") // Thêm @Column nếu tên cột khác orderDate
+    @Column(name = "order_date") 
     private Date orderDate;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "predict_receive_date") // Thêm @Column nếu tên cột khác predictReceiveDate
+    @Column(name = "predict_receive_date") 
     private Date predictReceiveDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status") // Thêm @Column nếu tên cột khác status
+    @Column(name = "status") 
     private OrderStatus status;
 
-    @Column(name = "shipping_address") // Thêm @Column nếu tên cột khác shippingAddress
+    @Column(name = "shipping_address") 
     private String shippingAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,24 +51,15 @@ public class Order {
                            "hibernateLazyInitializer", "handler"})
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) // Thêm orphanRemoval nếu muốn
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) 
     @JsonManagedReference
-    private List<OrderLine> orderLines = new ArrayList<>();
+    private List<OrderLine> orderLines;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method") // Thêm @Column nếu tên cột khác paymentMethod
+    @Column(name = "payment_method") 
     private PaymentMethod paymentMethod;
 
-    @Column(name = "reviewed") // Thêm @Column nếu tên cột khác reviewed
-    private boolean reviewed = false;
+    @Column(name = "reviewed") 
+    private Boolean reviewed = false;
 
-    // Lombok sẽ tự tạo getters và setters cho itemsSubtotal
-    // Nếu không dùng Lombok Data, bạn cần tự thêm:
-    // public Double getItemsSubtotal() {
-    //     return itemsSubtotal;
-    // }
-    //
-    // public void setItemsSubtotal(Double itemsSubtotal) {
-    //     this.itemsSubtotal = itemsSubtotal;
-    // }
 }

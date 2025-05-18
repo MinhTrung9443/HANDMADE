@@ -15,14 +15,14 @@ public class Product {
     private List<String> imageUrls;
 
     private String name;
-    private double price;
+    private Double price;
     private String description;
     private int quantity;
     private Category category;
     private List<Comment> comments;
     private List<Product> relatedProducts;
 
-    public Product(long productId, String image, List<String> imageUrls, String name, double price, String description, int quantity, Category category, List<Comment> comments, List<Product> relatedProducts) {
+    public Product(long productId, String image, List<String> imageUrls, String name, Double price, String description, int quantity, Category category, List<Comment> comments, List<Product> relatedProducts) {
         this.productId = productId;
         this.imageUrls = imageUrls;
         this.name = name;
@@ -37,8 +37,10 @@ public class Product {
         this.productId = id;
     }
 
+    public Product() {
+    }
 
-    public Product(long productId, String image, String name, double price, String description, Category category) {
+    public Product(long productId, String image, String name, Double price, String description, Category category) {
         this.productId = productId;
         this.image = image;
         this.name = name;
@@ -52,7 +54,7 @@ public class Product {
     public void setImages(List<String> images) {
         this.images = images;
     }
-    public Product(String image, String name, double price) {
+    public Product(String image, String name, Double price) {
 
         this.image = image;
         this.name = name;
@@ -115,11 +117,11 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

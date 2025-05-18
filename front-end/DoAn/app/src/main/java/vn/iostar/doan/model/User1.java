@@ -4,20 +4,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class User1 implements Parcelable {
-    private long userId;
+    private Long userId;
     private String email;
     private String otp;
     private String password;
     private String fullName;
 
-    public User1(long userId) {
+    public User1(Long userId) {
         this.userId = userId;
     }
 
     public User1() {
     }
 
-    public User1(long userId, String email, String password, String fullName, String otp) {
+    public User1(Long userId, String email, String password, String fullName, String otp) {
         this.userId = userId;
         this.email = email;
         this.password = password;
@@ -37,7 +37,7 @@ public class User1 implements Parcelable {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

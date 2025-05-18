@@ -44,7 +44,8 @@ public class OrdersPagerAdapter extends FragmentStateAdapter {
             case "SHIPPING": return "Đang vận chuyển";
             case "RECEIVED": return "Đã nhận hàng";
             case "REVIEWED": return "Đã đánh giá";
-            case "ERROR": return "Đã hủy";
+            case "CANCELLED": return "Đã hủy";
+            case "ERROR": return "Lỗi";
             default: return status; // Trả về tên gốc nếu không khớp
         }
     }

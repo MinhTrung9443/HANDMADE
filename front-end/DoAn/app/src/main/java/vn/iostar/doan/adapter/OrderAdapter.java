@@ -23,6 +23,7 @@ import vn.iostar.doan.R; // <<<< Đảm bảo R đúng
 import vn.iostar.doan.model.Order;
 import vn.iostar.doan.model.OrderLine;
 import vn.iostar.doan.model.OrderStatus;
+import vn.iostar.doan.model.Product;
 import vn.iostar.doan.model.Product2;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
@@ -134,7 +135,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             llProductLines.removeAllViews();
             if (order.getOrderLines() != null && !order.getOrderLines().isEmpty()) {
                 for (OrderLine line : order.getOrderLines()) {
-                    Product2 product = line.getProduct();
+                    Product product = line.getProduct();
                     if (product != null && product.getName() != null) { // Thêm kiểm tra product.getName()
                         TextView tvProduct = new TextView(itemView.getContext());
                         tvProduct.setText("- " + product.getName() + " (SL: " + line.getQuantity() + ")");
@@ -219,7 +220,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 case REVIEWED: return "Đã duyệt";
                 case SHIPPING: return "Đang vận chuyển";
                 case RECEIVED: return "Đã nhận hàng";
-                case ERROR: return "Đã hủy";
+                case CANCELLED: return "Đã hủy";
+                case ERROR: return "Lỗi";
                 default: return status.name();
             }
         }
@@ -231,6 +233,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             switch (status) {
                 case RECEIVED: return ContextCompat.getColor(context, R.color.my_green_success); // Đảm bảo có màu này
                 case SHIPPING: return ContextCompat.getColor(context, R.color.my_orange_processing); // Đảm bảo có màu này
+                case CANCELLED:    return ContextCompat.getColor(context, R.color.my_red_error); // Đảm bảo có màu này
                 case ERROR:    return ContextCompat.getColor(context, R.color.my_red_error); // Đảm bảo có màu này
                 default:       return ContextCompat.getColor(context, R.color.my_grey_neutral);
             }

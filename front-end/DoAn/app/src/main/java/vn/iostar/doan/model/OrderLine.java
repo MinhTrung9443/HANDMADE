@@ -1,33 +1,66 @@
 package vn.iostar.doan.model;
 
-// import lombok.Data;
-// @Data
+import com.google.gson.annotations.SerializedName;
+
 public class OrderLine {
 
-    // Các trường đã có
-    private long orderLineId;
-    private int quantity;
-    // private Order order; // Thường không cần back reference ở Android Model
-    private Product2 product;
 
-    // === THÊM TRƯỜNG CÒN THIẾU ===
-    private double price; // Giá sản phẩm tại thời điểm đặt hàng
-    // =============================
+    @SerializedName("orderLineId")
+    private Long orderLineId;
 
-    // === TẠO GETTER/SETTER CHO TRƯỜNG MỚI ===
-    public double getPrice() {
+    @SerializedName("quantity")
+    private Integer quantity;
+
+    @SerializedName("price")
+    private Double price;
+
+    private Product2 product2;
+
+    @SerializedName("product")
+    private Product product;
+    public OrderLine() {
+    }
+
+    public OrderLine(Long orderLineId) {
+        this.orderLineId = orderLineId;
+    }
+    public OrderLine(Long orderLineId, Integer quantity, Double price, Product product) {
+        this.orderLineId = orderLineId;
+        this.quantity = quantity;
+        this.price = price;
+        this.product = product;
+    }
+
+    public Long getOrderLineId() {
+        return orderLineId;
+    }
+
+    public void setOrderLineId(Long orderLineId) {
+        this.orderLineId = orderLineId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    // --- Getters/Setters cho các trường đã có ---
-    public long getOrderLineId() { return orderLineId; }
-    public void setOrderLineId(long orderLineId) { this.orderLineId = orderLineId; }
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-    public Product2 getProduct() { return product; }
-    public void setProduct(Product2 product) { this.product = product; }
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+    
 }

@@ -40,8 +40,10 @@ import vn.iostar.doan.api.ApiService;
 import vn.iostar.doan.adapter.ImagesViewPager2Adapter;
 import vn.iostar.doan.adapter.ProductAdapter; // Import ProductAdapter
 import vn.iostar.doan.adapter.CommentAdapter; // Import CommentAdapter
+import vn.iostar.doan.model.Cart;
 import vn.iostar.doan.model.Comment; // Import Comment model
 import vn.iostar.doan.model.Product; // Import Product model
+import vn.iostar.doan.modelRequest.CartActionRequest;
 // import vn.iostar.doan.model.Category; // Import Category nếu cần thiết trong Product model
 
 
@@ -84,13 +86,13 @@ public class ProductDetailActivity extends AppCompatActivity {
     private long currentProductId = -1;
     private long userId = -1;
     private Product currentProduct; // Biến để lưu trữ sản phẩm hiện tại (Quan trọng cho việc truyền dữ liệu)
-
+    private String authToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
-
+        authToken = getIntent().getStringExtra("token");
         AnhXa(); // Ánh xạ View và khởi tạo Adapter
         apiService = ApiService.apiService; // Khởi tạo ApiService
         setupToolbar(); // Cài đặt Toolbar
@@ -98,8 +100,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         // Lấy dữ liệu từ Intent
         Intent intent = getIntent();
         if (intent != null) {
-            currentProductId = intent.getLongExtra("product_id", -1L);
-            userId = intent.getLongExtra("user_id", -1L);
+            currentProductId = intent.getLongExtra("productId", -1L);
+            userId = intent.getLongExtra("userId", -1L);
             Log.d(TAG, "Received from Intent - Product ID: " + currentProductId + ", User ID: " + userId);
 
             // Nếu có Product ID hợp lệ thì fetch dữ liệu
@@ -237,14 +239,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             showError("Lỗi: Dữ liệu sản phẩm không hợp lệ.");
             return;
         }
-
-        // --- Hiển thị thông tin cơ bản ---
         textViewProductName.setText(product.getName());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(product.getName());
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
-        }
-
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         textViewProductPrice.setText(currencyFormatter.format(product.getPrice()));
         textViewProductQuantity.setText("Còn lại: " + product.getQuantity()); // Giả sử có getQuantity()
@@ -344,17 +339,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     // Hàm xử lý khi nhấn nút Add to Cart
     private void handleAddToCartClick() {
         if (currentProductId != -1) {
-            if(userId != -1) {
-                Log.d(TAG, "Add to Cart Clicked: Product ID=" + currentProductId + ", User ID=" + userId);
-                // TODO: Gọi API để thêm vào giỏ hàng thực tế
-                Toast.makeText(this, "Đã thêm sản phẩm vào giỏ", Toast.LENGTH_SHORT).show(); // Thông báo tạm
-            } else {
-                Log.w(TAG, "Add to Cart Clicked: User not logged in (userId is -1).");
-                Toast.makeText(this, "Vui lòng đăng nhập để thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
-                // TODO: Chuyển hướng tới màn hình đăng nhập nếu cần
-                // Intent loginIntent = new Intent(this, LoginActivity.class);
-                // startActivity(loginIntent);
-            }
+            int quantityToAdd = 1;
+            addProductToCart(currentProductId, quantityToAdd);
         } else {
             Log.e(TAG, "Add to Cart Clicked: Invalid Product ID.");
             Toast.makeText(this, "Lỗi: Không thể thêm sản phẩm không hợp lệ.", Toast.LENGTH_SHORT).show();
@@ -414,8 +400,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
         if (isLoading) {
-            showContent(false); // Ẩn nội dung khi đang tải
-            showError(null);    // Ẩn lỗi cũ
+            showError(null);
         }
         // Việc hiển thị lại nội dung sẽ do onResponse xử lý
     }
@@ -446,13 +431,64 @@ public class ProductDetailActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "fabAddToCart is null in showContent!");
         }
+        fabAddToCart.setVisibility(show ? View.VISIBLE : View.GONE);
+
+
     }
 
-    // --- Placeholder cho hàm thêm vào giỏ hàng thực tế ---
-    // private void addToCart(long productId, long userId) {
-    //     Log.d(TAG, "Attempting to add product " + productId + " to cart for user " + userId);
-    //     // TODO: Implement API call using Retrofit
-    //     // Call<YourCartResponse> call = apiService.addToCart(userId, productId, 1);
-    //     // call.enqueue(new Callback<YourCartResponse>() { ... });
-    // }
+    private void addProductToCart(long productId, int quantity) {
+        if (apiService == null) {
+            Log.e(TAG, "ApiService is not initialized!");
+            Toast.makeText(this, "Lỗi dịch vụ, vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showLoading(true); // Hiện loading nếu muốn
+
+        CartActionRequest request = new CartActionRequest(productId, quantity);
+        String headerToken = "Bearer " + authToken;
+
+        apiService.addToCart(headerToken, request)
+                .enqueue(new Callback<Cart>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Cart> call, @NonNull Response<Cart> response) {
+                        showLoading(false);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(ProductDetailActivity.this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(ProductDetailActivity.this, CartActivity.class);
+                            intent.putExtra("token", authToken);
+                            startActivity(intent);
+                            Log.i(TAG, "Product added to cart successfully.");
+                        } else {
+                            String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
+                            try {
+                                if (response.errorBody() != null) {
+                                    errorMsg = response.errorBody().string();
+                                    if (response.code() == 400) {
+                                        Toast.makeText(ProductDetailActivity.this, "Lỗi: " + errorMsg, Toast.LENGTH_LONG).show();
+                                    } else if (response.code() == 401 || response.code() == 403) {
+                                        Toast.makeText(ProductDetailActivity.this, "Phiên đăng nhập hết hạn.", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(ProductDetailActivity.this, "Lỗi máy chủ: " + response.code(), Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(ProductDetailActivity.this, errorMsg + " (Code: " + response.code() + ")", Toast.LENGTH_LONG).show();
+                                }
+                                Log.e(TAG, "Failed to add to cart: " + response.code() + " - " + errorMsg);
+
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing error body", e);
+                                Toast.makeText(ProductDetailActivity.this, "Lỗi không xác định khi thêm vào giỏ.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Cart> call, @NonNull Throwable t) {
+                        showLoading(false); // Ẩn loading
+                        Log.e(TAG, "API call failed (addToCart): ", t);
+                        Toast.makeText(ProductDetailActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }

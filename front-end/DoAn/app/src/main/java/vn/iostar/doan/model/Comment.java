@@ -11,17 +11,7 @@ public class Comment {
     // private LocalDateTime createdAt; // Thay thế dòng này
     private Date createdAt; // Bằng dòng này
     private String fullname;
-    private long product_id;
     private String avatar; // Thêm trường avatar nếu API trả về
-    private long userId;
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
 
     public Comment() {
     }
@@ -72,14 +62,6 @@ public class Comment {
 
     public void setRating(int rating) {
         this.rating = rating;
-    }
-
-    public long getProduct_id() {
-        return product_id;
-    }
-
-    public void setProduct_id(long product_id) {
-        this.product_id = product_id;
     }
 
     public String getAvatar() {

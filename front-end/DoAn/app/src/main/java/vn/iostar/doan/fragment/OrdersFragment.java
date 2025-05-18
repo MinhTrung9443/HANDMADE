@@ -27,6 +27,7 @@ import vn.iostar.doan.adapter.OrderAdapter; // <<<< Import OrderAdapter
 import vn.iostar.doan.model.Order;
 import vn.iostar.doan.model.OrderLine; // Nếu bạn dùng trong logic giả lập
 import vn.iostar.doan.model.OrderStatus; // Enum trạng thái
+import vn.iostar.doan.model.Product;
 import vn.iostar.doan.model.Product2;   // Nếu bạn dùng trong logic giả lập
 
 // Các import cho API call (OkHttp hoặc Retrofit) nếu bạn triển khai ở đây
@@ -132,39 +133,39 @@ public class OrdersFragment extends Fragment implements OrderAdapter.OrderIntera
             // Tạo dữ liệu giả lập dựa trên currentTabStatus
             if (currentTabStatus.equalsIgnoreCase("WAITING")) {
                 Order order1 = new Order(); order1.setOrderId(101L); order1.setStatus(OrderStatus.WAITING);
-                Product2 p1 = new Product2(); p1.setName("Sản phẩm Chờ 1");
+                Product p1 = new Product(); p1.setName("Sản phẩm Chờ 1");
                 OrderLine ol1 = new OrderLine(); ol1.setProduct(p1); ol1.setQuantity(1);
                 order1.setOrderLines(List.of(ol1));
                 dummyOrders.add(order1);
             } else if (currentTabStatus.equalsIgnoreCase("REVIEWED")) {
                 Order order2 = new Order(); order2.setOrderId(202L); order2.setStatus(OrderStatus.REVIEWED);
-                Product2 p2 = new Product2(); p2.setName("Sản phẩm Đã Duyệt 2");
+                Product p2 = new Product(); p2.setName("Sản phẩm Đã Duyệt 2");
                 OrderLine ol2 = new OrderLine(); ol2.setProduct(p2); ol2.setQuantity(2);
                 order2.setOrderLines(List.of(ol2));
                 dummyOrders.add(order2);
             } else if (currentTabStatus.equalsIgnoreCase("SHIPPING")) {
                 Order order3 = new Order(); order3.setOrderId(303L); order3.setStatus(OrderStatus.SHIPPING);
-                Product2 p3 = new Product2(); p3.setName("Sản phẩm Đang Giao 3");
+                Product p3 = new Product(); p3.setName("Sản phẩm Đang Giao 3");
                 OrderLine ol3 = new OrderLine(); ol3.setProduct(p3); ol3.setQuantity(1);
                 order3.setOrderLines(List.of(ol3));
                 dummyOrders.add(order3);
             } else if (currentTabStatus.equalsIgnoreCase("RECEIVED")) {
                 Order order4 = new Order(); order4.setOrderId(404L); order4.setStatus(OrderStatus.RECEIVED); order4.setReviewed(false);
-                Product2 p4_1 = new Product2(); p4_1.setProductId(1L); p4_1.setName("Sản phẩm Đã Nhận A (chưa đánh giá)");
-                Product2 p4_2 = new Product2(); p4_2.setProductId(2L); p4_2.setName("Sản phẩm Đã Nhận B (chưa đánh giá)");
+                Product p4_1 = new Product(); p4_1.setProductId(1L); p4_1.setName("Sản phẩm Đã Nhận A (chưa đánh giá)");
+                Product p4_2 = new Product(); p4_2.setProductId(2L); p4_2.setName("Sản phẩm Đã Nhận B (chưa đánh giá)");
                 OrderLine ol4_1 = new OrderLine(); ol4_1.setProduct(p4_1); ol4_1.setQuantity(1);
                 OrderLine ol4_2 = new OrderLine(); ol4_2.setProduct(p4_2); ol4_2.setQuantity(2);
                 order4.setOrderLines(List.of(ol4_1, ol4_2));
                 dummyOrders.add(order4);
 
                 Order order5 = new Order(); order5.setOrderId(505L); order5.setStatus(OrderStatus.RECEIVED); order5.setReviewed(true);
-                Product2 p5 = new Product2(); p5.setProductId(3L); p5.setName("Sản phẩm Đã Nhận C (đã đánh giá)");
+                Product p5 = new Product(); p5.setProductId(3L); p5.setName("Sản phẩm Đã Nhận C (đã đánh giá)");
                 OrderLine ol5 = new OrderLine(); ol5.setProduct(p5); ol5.setQuantity(3);
                 order5.setOrderLines(List.of(ol5));
                 dummyOrders.add(order5);
             } else if (currentTabStatus.equalsIgnoreCase("ERROR")) {
                 Order order6 = new Order(); order6.setOrderId(606L); order6.setStatus(OrderStatus.ERROR);
-                Product2 p6 = new Product2(); p6.setName("Sản phẩm Lỗi/Hủy 6");
+                Product p6 = new Product(); p6.setName("Sản phẩm Lỗi/Hủy 6");
                 OrderLine ol6 = new OrderLine(); ol6.setProduct(p6); ol6.setQuantity(1);
                 order6.setOrderLines(List.of(ol6));
                 dummyOrders.add(order6);

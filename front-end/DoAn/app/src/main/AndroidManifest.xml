@@ -4,10 +4,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-
-
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -30,12 +33,21 @@
             </intent-filter>
 
         </activity>
+        <activity android:name=".activity.AboutAppActivity"/>
         <activity android:name=".activity.ProductDetailActivity" />
         <activity android:name=".activity.ProfileActivity"></activity>
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.RegisterActivity" />
         <activity android:name=".activity.HomeActivity" />
         <activity android:name=".activity.VerifyOtpRegisterActivity" />
+        <activity android:name=".activity.CartActivity"/>
+        <activity android:name=".activity.EditProfileActivity"/>
+        <activity android:name=".activity.ShippingAddressActivity"/>
+        <activity android:name=".activity.AddressFormActivity"/>
+        <activity android:name=".activity.AboutUsActivity"/>
+        <activity android:name=".activity.OrderActivity"/>
+        <activity android:name=".activity.OrderSuccessActivity"/>
+        <activity android:name=".activity.OrderDetailActivity"/>
         <activity android:name=".activity.ChatActivity" />
         <activity android:name=".activity.ConfirmPasswordActivity"/>
         <activity android:name=".activity.ForgetPasswordActivity"/>
@@ -45,7 +57,22 @@
         <activity
             android:name=".activity.OrderHistoryActivity"/>
         <activity
-            android:name=".activity.OrderDetailActivity"/>
+            android:name=".activity.VNPAYPaymentActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <!-- Intent Filter để bắt Custom Scheme URL từ VNPAY -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <!-- Thay "myapp" và "vnpayresult" nếu bạn dùng scheme/host khác -->
+            <data android:scheme="myapp" android:host="vnpayresult" />
+        </intent-filter>
+
+    </activity>
+        
 
     </application>
 </manifest>

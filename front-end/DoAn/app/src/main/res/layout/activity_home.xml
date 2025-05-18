@@ -47,17 +47,18 @@
     <!-- RecyclerView Category -->
 
     <TextView
+        android:id="@+id/textViewCategoryTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="16dp"
         android:background="@android:color/white"
         android:text="Thể loại"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/rc_category"/>
+        app:layout_constraintTop_toBottomOf="@id/searchLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc_category"
@@ -122,15 +123,12 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Thanh điều hướng dưới cùng -->
     <include
-        layout="@layout/footer"
-        android:layout_width="match_parent"
+        android:id="@+id/bottom_navigation"
+        layout="@layout/bottom_nav_menu"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

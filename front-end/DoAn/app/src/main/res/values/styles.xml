@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="RoundedImageView">
+    <!-- Style cho ImageView bo tròn -->
+    <!-- Tên style này hơi khác với cái bạn dùng trong ShapeableImageView -->
+    <!-- Nếu bạn chỉ muốn dùng style cho ShapeableImageView, hãy dùng tên "ShapeAppearance.App.CircularImageView" -->
+    <!-- <style name="RoundedImageView">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
-    </style>
+    </style> -->
+
+    <!-- Style cho các nút KeyButton -->
     <style name="KeyButton" parent="Widget.AppCompat.Button">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
@@ -11,9 +16,21 @@
         <item name="android:backgroundTint">@android:color/white</item>
         <item name="android:textColor">@color/black</item>
     </style>
+    <style name="ShapeAppearanceOverlay.App.EditProfile.CornerSize50Percent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <!-- Style cho RatingBar -->
     <style name="RatingBar" parent="Widget.AppCompat.RatingBar.Small">
-    <item name="colorControlNormal">@color/grey_400</item> <!-- Color for the empty stars -->
-    <item name="colorControlActivated">@color/yellow_500</item> <!-- Color for the filled stars -->
+        <item name="colorControlNormal">@color/grey_400</item>
+        <item name="colorControlActivated">@color/yellow_500</item>
+    </style>
+
+    <!-- ĐỊNH NGHĨA STYLE BO TRÒN CHO ShapeableImageView ĐƯỢC DI CHUYỂN RA NGOÀI -->
+    <!-- Đây là style được tham chiếu bởi app:shapeAppearanceOverlay trong XML layout About Us -->
+    <style name="ShapeAppearance.App.CircularImageView" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 
 </resources>

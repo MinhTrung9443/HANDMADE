@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.AboutAppActivity"
+    android:background="@drawable/image_87">
+
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        android:paddingVertical="8dp"
+        android:background="?attr/colorSurface"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back button"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Thông tin về MANJHA"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="?attr/colorOnSurface"
+            android:gravity="center_horizontal"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/header_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_margin="16dp"
+            android:background="@drawable/rounded_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chào mừng bạn đến với MANJHA!"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MANJHA là nền tảng dành riêng cho những người yêu thích và trân trọng vẻ đẹp của đồ handmade. Chúng tôi kết nối bạn với cộng đồng các nghệ nhân tài năng, nơi mỗi sản phẩm là một tác phẩm nghệ thuật thủ công độc đáo, được tạo ra bằng cả tâm huyết và sự khéo léo."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sứ mệnh của chúng tôi:"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MANJHA mong muốn trở thành cầu nối vững chắc giữa người tiêu dùng và các nghệ nhân thủ công, góp phần bảo tồn và phát triển các giá trị truyền thống, đồng thời mang đến những trải nghiệm mua sắm đầy cảm hứng và ý nghĩa."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Khám phá MANJHA với các tính năng:"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Bộ sưu tập đồ handmade phong phú và đa dạng từ khắp nơi."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Tìm kiếm dễ dàng theo loại sản phẩm, nghệ nhân, hoặc từ khóa."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Trang thông tin chi tiết về từng sản phẩm và câu chuyện của nghệ nhân."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Kết nối trực tiếp với nghệ nhân để hỏi đáp hoặc đặt hàng tùy chỉnh."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="- Quy trình mua hàng đơn giản, thanh toán an toàn và đa dạng."
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hãy tải ứng dụng MANJHA ngay hôm nay để bắt đầu hành trình khám phá thế giới đồ handmade đầy màu sắc!"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?attr/colorOnBackground"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Phiên bản 1.0"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textColor="?attr/colorOnBackground"
+                tools:ignore="SmallSp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

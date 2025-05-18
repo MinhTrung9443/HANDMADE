@@ -1,5 +1,5 @@
 package vn.iostar.doan.model;
 
 public enum OrderStatus {
-    WAITING, REVIEWED, RECEIVED , 	SHIPPING, 	ERROR
+    WAITING,PENDING,  REVIEWED,DELIVERED, SHIPPING, CANCELLED, RECEIVED , ERROR
 }

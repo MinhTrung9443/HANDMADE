@@ -1,143 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cartRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/image_62"
     android:orientation="vertical"
-    android:padding="16dp">
+    tools:context=".activity.CartActivity">
 
-    <!-- Danh sách địa chỉ đã có -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_cards"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_collapseMode="pin"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
+    <TextView
+        android:layout_marginTop="10dp"
+        android:paddingStart="20dp"
+        android:text="GIỎ HÀNG CỦA BẠN:"
+        android:textStyle="bold"
+        android:textColor="@color/blue"
+        android:textSize="28dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/> <!-- Giữ nguyên TextView này -->
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-
-    <!-- Form thêm địa chỉ mới -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:background="@android:color/black">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add New Card"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:paddingBottom="8dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Name on card"
-            app:boxBackgroundMode="outline">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/txt_namecard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Card number"
-            app:boxBackgroundMode="outline">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/txt_number_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Month/Year"
-                app:boxBackgroundMode="outline">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edt_expiry"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="CVV"
-                app:boxBackgroundMode="outline">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edt_cvv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberPassword"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_save_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Card"
-            android:backgroundTint="@android:color/white"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-    </LinearLayout>
-
-
+    android:layout_weight="1"
+    android:layout_marginTop="25dp"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:background="@android:color/black">
+        android:orientation="vertical">
 
+        <!-- RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCartItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="1dp"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_cart" />
+
+        <!-- TextView Empty Cart -->
         <TextView
+            android:id="@+id/textViewEmptyCart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Discount Coupons"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:paddingBottom="8dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Coupon Code"
-            app:boxBackgroundMode="outline">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/txt_discount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </LinearLayout>
-    <!-- Nút tiếp tục -->
-    <Button
-        android:id="@+id/btn_next"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Next"
-        android:backgroundTint="@android:color/black"
-        android:textColor="@android:color/white"
+            android:gravity="center"
+            android:padding="16dp"
+        android:text="Giỏ hàng của bạn đang trống"
+        android:textColor="#757575"
         android:textSize="18sp"
-        android:layout_marginTop="8dp"/>
+        android:visibility="gone" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBarCart"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
+
+
+    <!-- Summary Layout -->
+<LinearLayout
+android:id="@+id/summaryLayout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+    android:background="#212121"
+    android:orientation="vertical"
+    android:layout_gravity="bottom"
+    android:padding="20dp">
+
+<CheckBox
+android:id="@+id/checkboxSelectAll"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:buttonTint="#EEEEEE"
+android:text="Chọn tất cả"
+android:textColor="#EEEEEE" />
+
+    <!-- Bỏ LinearLayout chứa Thuế và Phí vận chuyển -->
+    <!-- <LinearLayout ... > ... </LinearLayout> -->
+
+<View
+android:layout_width="match_parent"
+android:layout_height="1dp"
+android:layout_marginTop="16dp"
+android:layout_marginBottom="6dp"
+    android:background="#424242" />
+
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginTop="6dp"
+android:orientation="horizontal">
+
+<TextView
+    android:id="@+id/textViewTotalLabel"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:text="Tạm tính"
+android:textColor="#FFFFFF"
+android:textSize="18sp"
+android:textStyle="bold" />
+
+<TextView
+    android:id="@+id/textViewTotalValue"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#FFFFFF"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    tools:text="0 đ" />
 </LinearLayout>
+
+<androidx.appcompat.widget.AppCompatButton
+android:id="@+id/buttonCheckout"
+android:layout_width="170dp"
+android:layout_height="40dp"
+android:layout_marginTop="16dp"
+    android:layout_marginBottom="10dp"
+    android:layout_gravity="center"
+    android:background="@drawable/bottom_nav_background"
+    android:enabled="false"
+    android:text="Thanh toán (0)"
+    android:textAllCaps="false"
+    android:textColor="#FFFFFF"
+    android:textSize="16sp"
+    android:textStyle="bold" />
+    </LinearLayout>
+
+    </LinearLayout>

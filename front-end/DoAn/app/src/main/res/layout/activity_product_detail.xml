@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F8F8F8"
+    android:fitsSystemWindows="true"
     tools:context=".activity.ProductDetailActivity">
 
     <!-- AppBarLayout và CollapsingToolbarLayout giữ nguyên -->
@@ -42,17 +44,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
+                app:title=""
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- NestedScrollView cho nội dung cuộn -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:clipToPadding="false"
+        android:paddingBottom="90dp"> <!-- Tăng padding dưới cùng để không bị che -->
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -135,9 +141,9 @@
                 android:isIndicator="true"
                 android:theme="@style/RatingBar"
                 android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
+                tools:visibility="visible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
 
             <!-- Số lượng đánh giá -->
             <TextView
@@ -147,21 +153,21 @@
                 android:layout_marginStart="8dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
                 android:visibility="gone"
-            tools:visibility="visible"
-            tools:text="4.5 (15 đánh giá)"
-            app:layout_constraintStart_toEndOf="@id/ratingBarAverage"
-            app:layout_constraintTop_toTopOf="@id/ratingBarAverage"
-            app:layout_constraintBottom_toBottomOf="@id/ratingBarAverage" />
+                tools:visibility="visible"
+                tools:text="4.5 (15 đánh giá)"
+                app:layout_constraintStart_toEndOf="@id/ratingBarAverage"
+                app:layout_constraintTop_toTopOf="@id/ratingBarAverage"
+                app:layout_constraintBottom_toBottomOf="@id/ratingBarAverage" />
 
-
-            <!-- Product Price -->
+            <!-- Price Section -->
             <TextView
                 android:id="@+id/textViewProductPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                android:textColor="@color/design_default_color_primary"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/ratingBarAverage"
                 tools:text="150.000 đ" />

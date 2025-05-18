@@ -13,6 +13,7 @@ public interface IUserService {
 	void saveOtp(User user, String otp);
 
 	Optional<User> findByEmail(String email);
+	Optional<User> findByUserIdentifier(String identifier);
 
 	void saveUser(User user, String otp);
 

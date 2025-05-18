@@ -22,6 +22,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarProfile"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:navigationIcon="@drawable/ic_back"
+            app:title=""
+            app:layout_constraintTop_toTopOf="@id/headerImageView"
+            app:layout_constraintStart_toStartOf="@id/headerImageView"
+            app:layout_constraintEnd_toEndOf="@id/headerImageView"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:elevation="4dp"/>
 
         <!-- Profile Content Card -->
         <androidx.cardview.widget.CardView
@@ -60,7 +72,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Hồ sơ"
+                        android:text="Hồ sơ cá nhân"
                         android:textColor="#FFFFFF"
                         android:textSize="32sp"
                         android:textStyle="bold"
@@ -143,7 +155,7 @@
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp"
                     android:backgroundTint="#2C2C2C"
-                    android:text="Edit Profile"
+                    android:text="Chỉnh sửa thông tin cá nhân"
                     android:textColor="#E0E0E0" />
 
                 <Button
@@ -172,20 +184,6 @@
                     android:paddingEnd="20dp"
                     android:backgroundTint="#2C2C2C"
                     android:text="Địa chỉ vận chuyển"
-                    android:textColor="#E0E0E0" />
-
-                <Button
-                    android:id="@+id/creditCardsButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="55dp"
-                    android:layout_marginTop="15dp"
-                    android:drawableStart="@drawable/cart"
-                    android:drawablePadding="16dp"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:backgroundTint="#2C2C2C"
-                    android:text="Thẻ thanh toán"
                     android:textColor="#E0E0E0" />
 
             </LinearLayout>

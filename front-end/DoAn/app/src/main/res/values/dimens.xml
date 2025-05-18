@@ -4,4 +4,9 @@
     <!-- Bạn có thể thêm các định nghĩa dimension khác ở đây -->
     <dimen name="divider_height">1dp</dimen>
     <dimen name="divider_margin">8dp</dimen>
+
+        <!-- Các dimensions khác của bạn -->
+        <dimen name="divider_margin_vertical">8dp</dimen>
+        <!-- Ví dụ: <dimen name="divider_margin">8dp</dimen> nếu bạn đã dùng cái này ở code trước -->
+
 </resources>
