@@ -239,14 +239,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             showError("Lỗi: Dữ liệu sản phẩm không hợp lệ.");
             return;
         }
-
-        // --- Hiển thị thông tin cơ bản ---
         textViewProductName.setText(product.getName());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(product.getName());
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
-        }
-
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         textViewProductPrice.setText(currencyFormatter.format(product.getPrice()));
         textViewProductQuantity.setText("Còn lại: " + product.getQuantity()); // Giả sử có getQuantity()
@@ -346,7 +339,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     // Hàm xử lý khi nhấn nút Add to Cart
     private void handleAddToCartClick() {
         if (currentProductId != -1) {
-            Toast.makeText(this, "Thêm sản phẩm " + currentProductId + " vào giỏ", Toast.LENGTH_SHORT).show();
             int quantityToAdd = 1;
             addProductToCart(currentProductId, quantityToAdd);
         } else {
@@ -408,8 +400,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
         if (isLoading) {
-            showContent(false); // Ẩn nội dung khi đang tải
-            showError(null);    // Ẩn lỗi cũ
+            showError(null);
         }
         // Việc hiển thị lại nội dung sẽ do onResponse xử lý
     }
@@ -464,6 +455,9 @@ public class ProductDetailActivity extends AppCompatActivity {
                         showLoading(false);
                         if (response.isSuccessful()) {
                             Toast.makeText(ProductDetailActivity.this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(ProductDetailActivity.this, CartActivity.class);
+                            intent.putExtra("token", authToken);
+                            startActivity(intent);
                             Log.i(TAG, "Product added to cart successfully.");
                         } else {
                             String errorMsg = "Lỗi khi thêm vào giỏ hàng.";

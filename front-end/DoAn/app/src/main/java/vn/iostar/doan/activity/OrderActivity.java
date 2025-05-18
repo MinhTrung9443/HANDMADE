@@ -51,12 +51,11 @@ public class OrderActivity extends AppCompatActivity {
     private PaymentMethod selectedPaymentMethodEnum = PaymentMethod.COD;
     private Long pendingVnpayOrderId = null; // Biến lưu ID đơn VNPAY đang chờ thanh toán
 
-    // Định dạng tiền tệ
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+    public static final String EXTRA_ORDER_ID = "ORDER_ID";
 
-    // Biến cờ để kiểm tra xem cả 2 API fetch dữ liệu đã gọi xong chưa
     private int apiCallsCompleted = 0;
-    private final int TOTAL_API_CALLS = 2; // Số lượng API cần gọi khi load dữ liệu (địa chỉ và chi tiết sản phẩm)
+    private final int TOTAL_API_CALLS = 2;
 
 
     @Override
@@ -66,19 +65,15 @@ public class OrderActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         apiService = ApiService.apiService; // Lấy instance của ApiService
-
-        // Nhận và kiểm tra dữ liệu Intent
         if (!receiveIntentData()) {
-            return; // Thoát Activity nếu thiếu dữ liệu quan trọng
+            return;
         }
 
         setupToolbar();
         setupRecyclerView();
-        setupPaymentMethods(); // Setup lựa chọn thanh toán
+        setupPaymentMethods();
         setupPlaceOrderButton();
-        setupAddressClickListener(); // Thêm listener để có thể đổi địa chỉ
 
-        // Khôi phục trạng thái nếu Activity bị tắt và tạo lại trong quá trình chuyển hướng
         if (savedInstanceState != null) {
             pendingVnpayOrderId = savedInstanceState.getLong("pendingVnpayOrderId", -1L);
             if (pendingVnpayOrderId == -1L) {
@@ -87,50 +82,43 @@ public class OrderActivity extends AppCompatActivity {
             Log.d("OrderActivity", "Restored pendingVnpayOrderId: " + pendingVnpayOrderId);
         }
 
-        // Bắt đầu tải dữ liệu checkout ban đầu
         fetchCheckoutData();
     }
 
-    // *** PHƯƠNG THỨC QUAN TRỌNG ĐƯỢC GỌI KHI ACTIVITY ĐƯỢC HIỂN THỊ LẠI (bao gồm cả sau khi quay về từ VNPAY) ***
     @Override
     protected void onResume() {
         super.onResume();
-        // Kiểm tra xem chúng ta có đang chờ kết quả thanh toán VNPAY nào không
         if (pendingVnpayOrderId != null) {
             Log.i("PlaceOrder", "Activity resumed. Checking status for pending VNPAY order: " + pendingVnpayOrderId);
-            showLoading(true); // Hiển thị loading
-            binding.btnPlaceOrder.setEnabled(false); // Tắt nút
+            showLoading(true);
+            binding.btnPlaceOrder.setEnabled(false);
 
             String headerAuth = "Bearer " + authToken;
-
-            // Gọi API lấy chi tiết đơn hàng
             apiService.getOrderDetails(headerAuth, pendingVnpayOrderId).enqueue(new Callback<Order>() {
                 @Override
                 public void onResponse(Call<Order> call, Response<Order> response) {
-                    showLoading(false); // Ẩn loading
+                    showLoading(false);
                     if (response.isSuccessful() && response.body() != null) {
                         Order order = response.body();
                         Log.i("PlaceOrder", "Checked status for order " + pendingVnpayOrderId + ": " + (order != null && order.getStatus() != null ? order.getStatus().name() : "N/A"));
 
                         if (order != null && order.getStatus() != null) {
-                            // *** SỬA LOGIC KIỂM TRA TRẠNG THÁI DỰA TRÊN ENUM ĐỒNG BỘ ***
                             if (order.getStatus() == OrderStatus.REVIEWED || order.getStatus() == OrderStatus.SHIPPING || order.getStatus() == OrderStatus.DELIVERED) { // Các trạng thái thành công sau thanh toán
                                 Toast.makeText(OrderActivity.this, "Thanh toán VNPAY thành công! Mã đơn: " + order.getOrderId(), Toast.LENGTH_LONG).show();
-                                Intent successIntent = new Intent(OrderActivity.this, HomeActivity.class); // Hoặc OrderHistoryActivity
+                                Intent successIntent = new Intent(OrderActivity.this, OrderDetailActivity.class); // Hoặc OrderHistoryActivity
+                                successIntent.putExtra(EXTRA_ORDER_ID, order.getOrderId());
                                 successIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(successIntent);
                                 finish();
-                            } else if (order.getStatus() == OrderStatus.CANCELLED ) { // Trạng thái thất bại/hủy
+                            } else if (order.getStatus() == OrderStatus.CANCELLED ) {
                                 Toast.makeText(OrderActivity.this, "Thanh toán VNPAY thất bại hoặc đã bị hủy cho đơn " + order.getOrderId() + ". Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                                 binding.btnPlaceOrder.setEnabled(true);
                                 pendingVnpayOrderId = null; // Reset state
-                            } else if (order.getStatus() == OrderStatus.PENDING) { // Vẫn chờ xác nhận (IPN chưa tới?)
+                            } else if (order.getStatus() == OrderStatus.PENDING) {
                                 Toast.makeText(OrderActivity.this, "Trạng thái đơn hàng VNPAY chưa được xác nhận. Vui lòng kiểm tra lại sau.", Toast.LENGTH_LONG).show();
                                 binding.btnPlaceOrder.setEnabled(true);
                                 pendingVnpayOrderId = null; // Reset state
-                            } else if (order.getStatus() == OrderStatus.WAITING) { // Trạng thái Waiting (Ban đầu cho COD)
-                                // Nếu Backend chuyển PendingPayment -> Waiting khi thành công VNPAY,
-                                // thì Mobile coi Waiting là thành công (không khuyến khích, nên dùng Processing).
+                            } else if (order.getStatus() == OrderStatus.WAITING) {
                                 Toast.makeText(OrderActivity.this, "Đơn hàng VNPAY đã được xác nhận. Mã đơn: " + order.getOrderId(), Toast.LENGTH_LONG).show();
                                 Intent successIntent = new Intent(OrderActivity.this, HomeActivity.class); // Hoặc OrderHistoryActivity
                                 successIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -138,7 +126,7 @@ public class OrderActivity extends AppCompatActivity {
                                 finish();
 
                             }
-                            else { // Trạng thái khác không mong muốn
+                            else {
                                 Toast.makeText(OrderActivity.this, "Đơn hàng có trạng thái không mong muốn: " + order.getStatus().name() + ". Vui lòng liên hệ hỗ trợ.", Toast.LENGTH_LONG).show();
                                 binding.btnPlaceOrder.setEnabled(true);
                                 pendingVnpayOrderId = null; // Reset
@@ -171,8 +159,6 @@ public class OrderActivity extends AppCompatActivity {
 
         }
     }
-
-    // *** PHƯƠNG THỨC ĐƯỢC GỌI KHI ACTIVITY LƯU TRẠNG THÁI (trước khi bị hệ điều hành kill) ***
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -182,41 +168,26 @@ public class OrderActivity extends AppCompatActivity {
         }
     }
 
-    // *** PHƯƠNG THỨC TRỢ GIÚP ĐỂ MỞ URL THANH TOÁN ***
     private void openPaymentUrl(String url) {
         try {
-            // Có thể dùng Custom Tabs để trải nghiệm tốt hơn nếu không mở app VNPAY
-            // CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-            // builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary)); // Đặt màu toolbar
-            // CustomTabsIntent customTabsIntent = builder.build();
-            // customTabsIntent.launchUrl(this, Uri.parse(url));
-
-            // Hoặc mở bằng trình duyệt mặc định
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(browserIntent);
 
         } catch (Exception e) {
             Log.e("PlaceOrder", "Failed to open payment URL: " + url, e);
             Toast.makeText(this, "Không thể mở liên kết thanh toán: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            // Xử lý lỗi: ẩn loading, bật lại nút, reset trạng thái chờ VNPAY
             showLoading(false);
             binding.btnPlaceOrder.setEnabled(true);
-            pendingVnpayOrderId = null; // Reset pending ID vì không redirect được
+            pendingVnpayOrderId = null;
         }
     }
 
-
-    // Các phương thức khác của Activity (giữ nguyên vị trí):
-
     private boolean receiveIntentData() {
-        // ... (giữ nguyên code nhận intent) ...
         Intent intent = getIntent();
-        // Đảm bảo key "authToken" đúng như bạn gửi từ Activity trước
-        authToken = intent.getStringExtra("authToken"); // <-- Kiểm tra key này
+        authToken = intent.getStringExtra("authToken");
 
-        if (intent.hasExtra("SELECTED_CART_ITEM_IDS")) { // <-- Kiểm tra key này
+        if (intent.hasExtra("SELECTED_CART_ITEM_IDS")) {
             try {
-                // Sử dụng getSerializableExtra
                 Object extra = intent.getSerializableExtra("SELECTED_CART_ITEM_IDS");
                 if (extra instanceof ArrayList<?>) {
                     selectedItemIds = new ArrayList<>();
@@ -234,7 +205,6 @@ public class OrderActivity extends AppCompatActivity {
                 Log.e("OrderActivityError", "Could not cast SELECTED_CART_ITEM_IDS extra", e);
             }
         }
-
 
         if (authToken == null || authToken.isEmpty()) {
             Log.e("OrderActivityError", "AuthToken is missing or empty.");
@@ -254,9 +224,7 @@ public class OrderActivity extends AppCompatActivity {
         return true;
     }
 
-
     private void setupToolbar() {
-        // ... (giữ nguyên code setup toolbar) ...
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -266,7 +234,6 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private void fetchAndSetDefaultAddress(String headerAuth) {
-        // ... (giữ nguyên code fetch và hiển thị địa chỉ) ...
         Log.d("OrderActivity", "Fetching user addresses...");
         apiService.getUserAddresses(headerAuth).enqueue(new Callback<List<Address>>() {
             @Override
@@ -278,7 +245,7 @@ public class OrderActivity extends AppCompatActivity {
                     Address foundDefault = null;
                     if (!addresses.isEmpty()) {
                         for (Address addr : addresses) {
-                            if (addr != null && addr.isDefaultAddress()) { // <-- Đảm bảo isDefaultAddress() đúng
+                            if (addr != null && addr.isDefaultAddress()) {
                                 foundDefault = addr;
                                 Log.d("OrderActivity", "Default address found in the list. ID: " + addr.getAddressId());
                                 break;
@@ -327,9 +294,7 @@ public class OrderActivity extends AppCompatActivity {
         });
     }
 
-    // Hàm displayAddress (giữ nguyên hoặc cải thiện)
     private void displayAddress(Address address) {
-        // ... (giữ nguyên code hiển thị địa chỉ lên TextViews) ...
         if (address == null) {
             binding.tvRecipientInfo.setText("Chưa chọn địa chỉ");
             binding.tvDeliveryAddress.setText("Vui lòng chọn địa chỉ giao hàng");
@@ -344,24 +309,9 @@ public class OrderActivity extends AppCompatActivity {
         if (address.getHouseNumber() != null && !address.getHouseNumber().isEmpty()) {
             fullAddressBuilder.append(address.getHouseNumber());
         }
-        if (address.getWard() != null && !address.getWard().isEmpty()) {
-            if (fullAddressBuilder.length() > 0) fullAddressBuilder.append(", ");
-            fullAddressBuilder.append(address.getWard());
-        }
-        if (address.getDistrict() != null && !address.getDistrict().isEmpty()) {
-            if (fullAddressBuilder.length() > 0) fullAddressBuilder.append(", ");
-            fullAddressBuilder.append(address.getDistrict());
-        }
-        if (address.getCity() != null && !address.getCity().isEmpty()) {
-            if (fullAddressBuilder.length() > 0) fullAddressBuilder.append(", ");
-            fullAddressBuilder.append(address.getCity());
-        }
-        // Bỏ qua country nếu không cần hiển thị
-
         binding.tvDeliveryAddress.setText(fullAddressBuilder.length() > 0 ? fullAddressBuilder.toString() : "Địa chỉ không đầy đủ");
     }
     private void setupRecyclerView() {
-        // ... (giữ nguyên code setup RecyclerView) ...
         checkoutItems = new ArrayList<>();
         checkoutItemsAdapter = new CheckoutItemsAdapter(checkoutItems);
         binding.rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
@@ -370,7 +320,6 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private void setupPaymentMethods() {
-        // ... (giữ nguyên code setup RadioGroup) ...
         binding.rgPaymentMethod.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -383,21 +332,11 @@ public class OrderActivity extends AppCompatActivity {
                 }
             }
         });
-
-        // Set initial enum value based on the checked button
         if (binding.rbCOD.isChecked()) {
             selectedPaymentMethodEnum = PaymentMethod.COD;
         } else if (binding.rbVNPAY.isChecked()) {
             selectedPaymentMethodEnum = PaymentMethod.VNPAY;
         }
-    }
-
-    private void setupAddressClickListener() {
-        binding.cardDeliveryAddress.setOnClickListener(v -> {
-            // TODO: Mở màn hình chọn/thêm địa chỉ (nếu có)
-            // Ví dụ: startActivityForResult(new Intent(this, AddressSelectionActivity.class), REQUEST_CODE_SELECT_ADDRESS);
-            Toast.makeText(this, "Chức năng chọn địa chỉ chưa được cài đặt.", Toast.LENGTH_SHORT).show();
-        });
     }
 
 
@@ -411,7 +350,6 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private void fetchSelectedItemDetails(String headerAuth) {
-        // ... (giữ nguyên code fetch item details) ...
         Log.d("OrderActivity", "Fetching item details for IDs: " + selectedItemIds.toString());
         CartItemDetailsRequest requestBody = new CartItemDetailsRequest(selectedItemIds);
 
@@ -448,19 +386,15 @@ public class OrderActivity extends AppCompatActivity {
         });
     }
 
-    // synchronized đảm bảo chỉ có 1 thread truy cập method này tại 1 thời điểm
     private synchronized void checkAndHideLoading() {
         apiCallsCompleted++;
         Log.d("OrderActivity", "API calls completed: " + apiCallsCompleted + "/" + TOTAL_API_CALLS);
         if (apiCallsCompleted >= TOTAL_API_CALLS) {
             showLoading(false);
-            // Không reset apiCallsCompleted ở đây, trừ khi bạn có logic load lại dữ liệu nhiều lần
-            // apiCallsCompleted = 0;
         }
     }
 
     private int calculateTotalQuantity(List<SelectedItemDetail> items) {
-        // ... (giữ nguyên code tính tổng số lượng) ...
         if (items == null) return 0;
         int total = 0;
         for (SelectedItemDetail item : items) {
@@ -471,7 +405,6 @@ public class OrderActivity extends AppCompatActivity {
 
 
     private void updateTotals() {
-        // ... (giữ nguyên code update totals) ...
         double subtotal = 0.0;
         if (checkoutItems != null) {
             for (SelectedItemDetail item : checkoutItems) {
@@ -497,7 +430,6 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private double calculateShippingFee() {
-        // ... (giữ nguyên code tính phí ship ví dụ) ...
         if (checkoutItems == null || checkoutItems.isEmpty()) return 0.0;
         int totalQuantity = calculateTotalQuantity(checkoutItems);
         if (totalQuantity == 0) return 0.0;
@@ -538,8 +470,6 @@ public class OrderActivity extends AppCompatActivity {
         apiService.createOrder(headerAuth, orderRequest).enqueue(new Callback<CreateOrderResponseDTO>() {
             @Override
             public void onResponse(Call<CreateOrderResponseDTO> call, Response<CreateOrderResponseDTO> response) {
-                // showLoading(false); // KHÔNG ẩn loading ngay nếu là VNPAY redirect
-                // binding.btnPlaceOrder.setEnabled(true); // KHÔNG bật lại nút ngay nếu là VNPAY redirect
 
                 if (response.isSuccessful() && response.code() == 201 && response.body() != null) {
                     CreateOrderResponseDTO responseDto = response.body();
@@ -553,57 +483,44 @@ public class OrderActivity extends AppCompatActivity {
                             Log.i("PlaceOrder", "VNPAY payment required. Redirecting to URL: " + paymentUrl);
                             Toast.makeText(OrderActivity.this, "Đang chuyển hướng đến VNPAY...", Toast.LENGTH_SHORT).show();
 
-                            // *** LƯU Order ID trước khi chuyển hướng ***
                             pendingVnpayOrderId = createdOrder.getOrderId();
                             Log.d("PlaceOrder", "Saved pendingVnpayOrderId: " + pendingVnpayOrderId);
 
-                            // Giữ trạng thái loading (hoặc hiển thị UI chờ thanh toán) và tắt nút
-                            // showLoading(true); // Đã gọi ở đầu phương thức
-                            // binding.btnPlaceOrder.setEnabled(false); // Đã gọi ở đầu phương thức
-
                             openPaymentUrl(paymentUrl);
 
-                            // KHÔNG finish() Activity ngay. Giữ Activity này lại để xử lý lúc quay lại trong onResume.
 
-                        } else { // COD hoặc Phương thức khác (hoặc VNPAY URL lỗi)
+                        } else {
                             Log.i("PlaceOrder", "Order placed with " + selectedPaymentMethodEnum.name() + " (or VNPAY URL missing/failed). Navigating.");
 
-                            // Ẩn loading và bật lại nút cho các trường hợp KHÔNG redirect VNPAY
                             showLoading(false);
                             binding.btnPlaceOrder.setEnabled(true);
 
                             if (selectedPaymentMethodEnum == PaymentMethod.VNPAY && (paymentUrl == null || paymentUrl.isEmpty())) {
-                                // Trường hợp đặc biệt: Chọn VNPAY nhưng tạo URL lỗi.
                                 Toast.makeText(OrderActivity.this, "Đặt hàng VNPAY tạm thời không khả dụng. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
-                                // Đơn hàng vẫn ở trạng thái PendingPayment nhưng không có URL. Người dùng không thanh toán được.
-                                // Để người dùng ở lại màn hình này hoặc tự quay về giỏ hàng.
-                                pendingVnpayOrderId = null; // Reset vì không redirect
-                                // Không finish() ngay
+                                pendingVnpayOrderId = null;
                             } else {
-                                // COD thành công hoặc các phương thức không cần redirect khác
                                 Toast.makeText(OrderActivity.this, "Đặt hàng thành công! Mã đơn: " + createdOrder.getOrderId(), Toast.LENGTH_LONG).show();
-                                // Chuyển hướng cho COD
-                                Intent successIntent = new Intent(OrderActivity.this, HomeActivity.class); // Hoặc OrderHistoryActivity
+                                Intent successIntent = new Intent(OrderActivity.this, OrderDetailActivity.class);
+                                successIntent.putExtra(EXTRA_ORDER_ID, createdOrder.getOrderId());
                                 successIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(successIntent);
-                                finish(); // Đóng Activity này cho COD
+                                finish();
                             }
                         }
-                    } else { // API trả về 201 nhưng Order object bị null - lỗi logic backend?
+                    } else {
                         showLoading(false);
                         binding.btnPlaceOrder.setEnabled(true);
                         Log.e("PlaceOrderError", "API Success (201) but Order object is null in response DTO.");
                         Toast.makeText(OrderActivity.this, "Lỗi nội bộ: Không nhận được chi tiết đơn hàng.", Toast.LENGTH_LONG).show();
                         pendingVnpayOrderId = null; // Reset
-                        // Tùy chọn: ở lại màn hình hoặc chuyển hướng cẩn thận
                     }
 
-                } else { // API gọi thất bại (lỗi 4xx, 5xx)
+                } else {
                     showLoading(false);
                     binding.btnPlaceOrder.setEnabled(true);
                     Log.e("PlaceOrderError", "API Error: " + response.code() + " - " + response.message());
-                    handleApiError(response); // Sử dụng hàm xử lý lỗi đã có
-                    pendingVnpayOrderId = null; // Reset
+                    handleApiError(response);
+                    pendingVnpayOrderId = null;
                 }
             }
 
@@ -613,20 +530,16 @@ public class OrderActivity extends AppCompatActivity {
                 binding.btnPlaceOrder.setEnabled(true);
                 Log.e("PlaceOrderError", "Failure placing order", t);
                 Toast.makeText(OrderActivity.this, "Lỗi mạng khi đặt hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                pendingVnpayOrderId = null; // Reset
+                pendingVnpayOrderId = null;
             }
         });
     }
-
-
-    // Hàm xử lý lỗi API chung
     private void handleApiError(Response<?> response) {
-        // ... (giữ nguyên code handleApiError) ...
         String errorMessage = "Đặt hàng thất bại. Mã lỗi: " + response.code();
         if (response.errorBody() != null) {
             try {
                 String errorBodyString = response.errorBody().string();
-                Log.e("ApiErrorBody", errorBodyString); // Log lỗi chi tiết
+                Log.e("ApiErrorBody", errorBodyString);
                 Gson gson = new Gson();
                 try {
                     Map<String, String> errorMap = gson.fromJson(errorBodyString, Map.class);
@@ -653,14 +566,10 @@ public class OrderActivity extends AppCompatActivity {
         }
         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
     }
-
-
-    // Hàm hiển thị/ẩn loading indicator (cần có ProgressBar trong layout với id="progressBar")
     private void showLoading(boolean isLoading) {
         if (binding != null && binding.progressBar != null) {
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         }
-        // Logic vô hiệu hóa/kích hoạt nút đặt hàng
         if (!isLoading && pendingVnpayOrderId == null) {
             binding.btnPlaceOrder.setEnabled(true);
         } else {

@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import vn.iostar.Project_Mobile.DTO.AddressDTO;
 import vn.iostar.Project_Mobile.DTO.ForgotPasswordRequest;
 import vn.iostar.Project_Mobile.DTO.LoginRequest;
 import vn.iostar.Project_Mobile.DTO.UserUpdateDTO;
@@ -28,6 +30,7 @@ import vn.iostar.Project_Mobile.entity.User;
 import vn.iostar.Project_Mobile.repository.AddressRepository;
 import vn.iostar.Project_Mobile.service.IEmailService;
 import vn.iostar.Project_Mobile.service.IUserService;
+import vn.iostar.Project_Mobile.service.impl.AddressService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,15 +38,18 @@ public class UserController {
 
 	@Autowired
 	private AddressRepository addressRepository;
+	@Autowired // Inject AddressService
+    private AddressService addressService;
 
 	 private final IUserService userService;
 	    private final IEmailService emailService;
 	    private final PasswordEncoder passwordEncoder;
-	    @Autowired
-	    public UserController(IUserService userService, IEmailService emailService, PasswordEncoder passwordEncoder) {
+	    @Autowired // Thêm AddressService vào constructor injection
+	    public UserController(IUserService userService, IEmailService emailService, PasswordEncoder passwordEncoder, AddressService addressService) {
 	        this.userService = userService;
 	        this.emailService = emailService;
 	        this.passwordEncoder = passwordEncoder;
+            this.addressService = addressService; // Gán AddressService
 	    }
 
 	    @PostMapping("/login")
@@ -95,33 +101,24 @@ public class UserController {
 	        }
 
 	        User user = userOpt.get();
+	        List<AddressDTO> userAddresses = addressService.getAddressesByUserId(user.getUserId());
+
 	        Map<String, Object> response = new HashMap<>();
 			response.put("userId", user.getUserId());
 	        response.put("email", user.getEmail());
 	        response.put("fullName", user.getFullName());
 	        response.put("phone", user.getPhone());
 	        response.put("avatar", user.getAvatar());
-	        List<Map<String, Object>> addressList = new ArrayList<>();
-	        if (user.getAddresses() != null) {
-	            for (Address addr : user.getAddresses()) {
-	                Map<String, Object> addressMap = new HashMap<>();
-	                addressMap.put("addressId", addr.getAddressId()); 
-	                addressMap.put("houseNumber", addr.getHouseNumber());
-	                addressMap.put("district", addr.getDistrict());
-	                addressMap.put("city", addr.getCity());
-	                addressMap.put("country", addr.getCountry());
-	                addressList.add(addressMap);
-	            }
-	        }
-	        response.put("addresses", addressList);
+ 
+            response.put("addresses", userAddresses);
 	        return ResponseEntity.ok(response);
 	    }
 
 	    //update thông tin
 	    @PutMapping("/update")
-	    public ResponseEntity<?> updateUser(
+	    public ResponseEntity<?> updateUser( 
 	            @RequestHeader("Authorization") String authHeader,
-	            @RequestBody UserUpdateDTO request
+	            @RequestBody UserUpdateDTO updateRequest 
 	    ) {
 	        String token = authHeader.replace("Bearer ", "").trim();
 	        Optional<User> userOpt = userService.findByToken(token);
@@ -131,20 +128,15 @@ public class UserController {
 	        }
 
 	        User user = userOpt.get();
-	        user.setFullName(request.getFullName());
-	        user.setAvatar(request.getAvatar());
-	        user.setPhone(request.getPhone());
 
-	        if (request.getAddressIds() != null) {
-	            List<Address> addressList = addressRepository.findAllById(request.getAddressIds());
-	            user.setAddresses(addressList);
-	        }
+	        user.setFullName(updateRequest.getFullName());
+	        user.setPhone(updateRequest.getPhone());
+	        user.setAvatar(updateRequest.getAvatar()); 
+	        User updatedUser = userService.save(user); // Lưu và lấy đối tượng đã cập nhật
 
-	        userService.save(user);
-
-	        return ResponseEntity.ok("Cập nhật thông tin thành công!");
+	        // Trả về đối tượng User đã cập nhật thay vì chuỗi String
+	        return ResponseEntity.ok(updatedUser);
 	    }
-
 
 	    
 	    @PostMapping("/forgot-password")
@@ -166,27 +158,29 @@ public class UserController {
 	        return ResponseEntity.ok(userOpt.get()); // Return the user object
 	    }
 
+	  
 	    @PostMapping("/reset-password")
 	    public ResponseEntity<User> resetPassword(@RequestBody ForgotPasswordRequest resetRequest) {
 	        String email = resetRequest.getEmail();
-	        String newPassword = resetRequest.getNewPassword();
+	        String newPassword = resetRequest.getNewPassword(); // Đây là mật khẩu plain text
 	        String confirmPassword = resetRequest.getConfirmPassword();
 
 	        if (!newPassword.equals(confirmPassword)) {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Return empty response if passwords do not match
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 	        }
 
-	        String encodedPassword = passwordEncoder.encode(newPassword);
+	        // String encodedPassword = passwordEncoder.encode(newPassword); // << BỎ DÒNG NÀY HOẶC COMMENT LẠI
 
-	        // Cập nhật mật khẩu
-	        boolean isReset = userService.resetPassword(email, encodedPassword);
+	        // Cập nhật mật khẩu: truyền mật khẩu plain text (newPassword) cho service
+	        boolean isReset = userService.resetPassword(email, newPassword); // << THAY ĐỔI Ở ĐÂY
 	        if (isReset) {
 	            Optional<User> userOpt = userService.findByEmail(email);
-	            return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)); // Return updated user object
+	            return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
 	        } else {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Return empty response if reset failed
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 	        }
 	    }
+
 
 	    @PostMapping("/verifyOtpForgotPassword")
 	    public ResponseEntity<User> verifyOtpForgotPassword(@RequestBody ForgotPasswordRequest otpRequest) {

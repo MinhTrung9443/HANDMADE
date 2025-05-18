@@ -34,13 +34,12 @@ import vn.iostar.doan.model.Address;
 import vn.iostar.doan.modelResponse.AddressInputDTO;
 import vn.iostar.doan.model.goong.GoongAutocompleteResponse; // Import Goong response model
 import vn.iostar.doan.utils.Constants; // Import Constants
-import androidx.appcompat.widget.Toolbar; // Import Toolbar
 
 public class AddressFormActivity extends AppCompatActivity {
 
     private static final String TAG = "AddressFormActivity";
 
-    private Toolbar toolbar; // Use Toolbar instead of ImageView for back button
+    private ImageView backButton;
     private TextView toolbarTitle;
     private TextInputEditText editTextFullName, editTextPhone, editTextHouseNumber,
             editTextWard, editTextDistrict, editTextCity, editTextCountry;
@@ -95,8 +94,8 @@ public class AddressFormActivity extends AppCompatActivity {
     }
 
     private void AnhXa() {
-        toolbar = findViewById(R.id.toolbar); // Find the Toolbar
-        // toolbarTitle = findViewById(R.id.toolbarTitle); // toolbarTitle is not in the layout
+        backButton = findViewById(R.id.backButton);
+        toolbarTitle = findViewById(R.id.toolbarTitle);
         editTextFullName = findViewById(R.id.editTextFullName);
         editTextPhone = findViewById(R.id.editTextPhone);
         editTextHouseNumber = findViewById(R.id.editTextHouseNumber);
@@ -136,7 +135,7 @@ public class AddressFormActivity extends AppCompatActivity {
     }
 
     private void setupListeners(String authHeader) {
-        toolbar.setNavigationOnClickListener(v -> { // Set listener on toolbar's navigation icon
+        backButton.setOnClickListener(v -> {
             setResult(RESULT_CANCELED); // User cancelled
             finish();
         });

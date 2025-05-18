@@ -9,5 +9,4 @@ public class UserUpdateDTO {
 	private String fullName;
 	private String avatar;
     private String phone;
-    private List<Long> addressIds;
 }

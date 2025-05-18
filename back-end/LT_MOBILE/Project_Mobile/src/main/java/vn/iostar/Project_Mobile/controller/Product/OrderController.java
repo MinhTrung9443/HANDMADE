@@ -1,92 +1,114 @@
 package vn.iostar.Project_Mobile.controller.Product;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest; // *** BỎ import này nếu đã inject vào service ***
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication; // Dùng Spring Security
-import org.springframework.security.core.context.SecurityContextHolder; // Dùng Spring Security
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.iostar.Project_Mobile.DTO.CreateOrderRequest;
+import vn.iostar.Project_Mobile.DTO.CreateOrderResponseDTO; // *** Import DTO Response ***
 import vn.iostar.Project_Mobile.entity.Order;
 import vn.iostar.Project_Mobile.entity.User;
 import vn.iostar.Project_Mobile.service.IOrderService;
-import vn.iostar.Project_Mobile.service.impl.UserServiceImpl; // Giả sử có UserService để lấy User
+import vn.iostar.Project_Mobile.service.impl.UserServiceImpl;
 
+import jakarta.validation.Valid;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/order")
+@Validated
 public class OrderController {
 
-	@Autowired
-	private IOrderService orderService;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
-	@Autowired
-	private UserServiceImpl userService; // Để lấy thông tin user đang đăng nhập
+    private final IOrderService orderService;
+    private final UserServiceImpl userService;
 
-	
-	public OrderController(IOrderService orderService, UserServiceImpl userService) {
-		this.orderService = orderService;
-		this.userService = userService;
-	}
+    public OrderController(IOrderService orderService, UserServiceImpl userService) {
+        this.orderService = orderService;
+        this.userService = userService;
+    }
 
+    private Optional<User> getUserByToken(String authHeader) {
+        // ... (Giữ nguyên) ...
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Optional.empty();
+        }
+        String token = authHeader.replace("Bearer ", "").trim();
+        return userService.findByToken(token);
+    }
 
-	@PostMapping("/createOrder")
-	public ResponseEntity<?> createOrder( @RequestHeader("Authorization") String authHeader, @RequestBody CreateOrderRequest request) {
-		try {
-			String token = authHeader.replace("Bearer ", "").trim();
-			System.out.println("TOKEN: " + token);
-			Optional<User> userOpt = userService.findByToken(token);
-			System.out.println("USER: " + userOpt);
-			if (!userOpt.isPresent()) {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
-			}
+    @PostMapping("/createOrder")
+    public ResponseEntity<?> createOrder(@RequestHeader("Authorization") String authHeader,
+                                         @Valid @RequestBody CreateOrderRequest request,
+                                         HttpServletRequest httpServletRequest
+                                       ) {
+        Optional<User> userOpt = getUserByToken(authHeader);
+        if (userOpt.isEmpty()) {
+            logger.warn("Unauthorized attempt to create order: Invalid token or header.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of("error", "Token không hợp lệ hoặc bị thiếu."));
+        }
 
-			User currentUser = userOpt.get(); // Lấy thông tin người dùng từ token
+        User currentUser = userOpt.get();
+        logger.info("User '{}' attempting to create order with payment method '{}'.", currentUser.getUserId(), request.getPaymentMethod() != null ? request.getPaymentMethod().name() : "null");
 
-				// Tạo đơn hàng mới
-			Order createdOrder = orderService.createOrder(currentUser, request);
+        try {
+            // *** Sửa kiểu biến nhận kết quả ***
+            CreateOrderResponseDTO responseDTO = orderService.createOrder(currentUser, request, httpServletRequest);
 
-				// Trả về thông tin đơn hàng vừa tạo
-			return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+            // Lấy orderId từ DTO để log nếu muốn
+            String orderId = responseDTO.getOrder() != null ? String.valueOf(responseDTO.getOrder().getOrderId()) : "N/A";
+            logger.info("Order created successfully response generated for user '{}', Order ID: {}", currentUser.getUserId(), orderId);
 
-		} catch (NoSuchElementException | IllegalArgumentException e) {
-				// Lỗi do người dùng cung cấp sai dữ liệu (ID không tồn tại, thiếu thông tin)
-			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (IllegalStateException e) {
-				// Lỗi nghiệp vụ (hết hàng, cart không tìm thấy)
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-		} catch (Exception e) {
-				// Lỗi server không mong muốn
-			e.printStackTrace(); // In lỗi ra console (chỉ dùng khi dev)
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("An error occurred while creating the order.");
-		}
-	}
+            // *** Trả về DTO trong ResponseEntity ***
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
-	// --- CÁC ENDPOINT KHÁC CHO ORDER ---
-	@GetMapping("/{orderId}")
-	public ResponseEntity<?> getOrderDetails(@PathVariable Long orderId, @RequestHeader("Authorization") String authHeader) {
-	    String token = authHeader.replace("Bearer ", "").trim();
-	    Optional<User> userOpt = userService.findByToken(token);
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            logger.warn("Bad request or Not Found during order creation for user '{}': {}", currentUser.getUserId(), e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            logger.error("Conflict or Business Logic Error during order creation for user '{}': {}", currentUser.getUserId(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Unexpected error during order creation for user '{}'", currentUser.getUserId(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("error", "Lỗi hệ thống, không thể tạo đơn hàng. Vui lòng thử lại sau."));
+        }
+    }
 
-	    if (userOpt.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
-	    }
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getOrderDetails(@PathVariable Long orderId, @RequestHeader("Authorization") String authHeader) {
+        Optional<User> userOpt = getUserByToken(authHeader);
+        if (userOpt.isEmpty()) {
+            logger.warn("Unauthorized attempt to get order details for orderId {}: Invalid token or header.", orderId);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of("error", "Token không hợp lệ hoặc bị thiếu."));
+        }
+        User currentUser = userOpt.get();
+        logger.info("User '{}' attempting to get details for orderId: {}", currentUser.getUserId(), orderId);
 
-	    try {
-	        Order order = orderService.getOrderDetailsById(orderId, userOpt.get());
-	        return ResponseEntity.ok(order);
-	    } catch (NoSuchElementException e) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Đơn hàng không tồn tại.");
-	    } catch (IllegalStateException e) {
-	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền xem đơn hàng này.");
-	    }
-	}
-
-
-	// @GetMapping("/{orderId}")
-	// public ResponseEntity<?> getOrderDetails(@PathVariable Long orderId) { ... }
-	// --- ---
+        try {
+            Order order = orderService.getOrderDetailsById(orderId, currentUser);
+            logger.debug("Order details retrieved successfully for orderId: {}", orderId);
+            return ResponseEntity.ok(order);
+        } catch (NoSuchElementException e) {
+            logger.warn("Order not found for ID: {} requested by user '{}'", orderId, currentUser.getUserId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body(Map.of("error", "Không tìm thấy đơn hàng với ID: " + orderId));
+        } catch (IllegalStateException e) {
+             logger.warn("Forbidden access attempt by user '{}' for orderId {}: {}", currentUser.getUserId(), orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                 .body(Map.of("error", "Bạn không có quyền xem đơn hàng này."));
+        } catch (Exception e) {
+             logger.error("Unexpected error retrieving order details for orderId {} requested by user '{}'", orderId, currentUser.getUserId(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("error", "Lỗi hệ thống, không thể lấy thông tin đơn hàng."));
+        }
+    }
 }

@@ -30,7 +30,7 @@ public class AddressInputDTO implements Serializable {
     @SerializedName("country")
     private String country;
 
-    @SerializedName("isDefaultAddress")
+    @SerializedName("isDefault")
     private boolean isDefaultAddress;
 
     // Constructor (giữ nguyên, truyền giá trị vào các biến nội bộ)

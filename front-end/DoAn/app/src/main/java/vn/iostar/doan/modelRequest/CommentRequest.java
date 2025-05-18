@@ -13,6 +13,24 @@ public class CommentRequest {
     private String image;  // Giữ lại nếu server chấp nhận và bạn muốn gửi (có thể là null)
     private long userId;
     private long productId;
+    private  long orderId;
+
+    public CommentRequest(String content, int rating, String image, long userId, long productId, long orderId) {
+        this.content = content;
+        this.rating = rating;
+        this.image = image;
+        this.userId = userId;
+        this.productId = productId;
+        this.orderId = orderId;
+    }
+
+    public long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(long orderId) {
+        this.orderId = orderId;
+    }
 
     public CommentRequest(String content, int rating, String image, long userId, long productId) {
         this.content = content;

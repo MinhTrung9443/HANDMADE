@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,19 +28,18 @@ import vn.iostar.doan.R;
 import vn.iostar.doan.adapter.AddressAdapter;
 import vn.iostar.doan.api.ApiService;
 import vn.iostar.doan.model.Address;
-import androidx.appcompat.widget.Toolbar; // Import Toolbar
 
 public class ShippingAddressActivity extends AppCompatActivity implements AddressAdapter.OnAddressActionListener {
 
     private static final String TAG = "ShippingAddressActivity";
-
+    private boolean defaultAddressChanged = false;
     private RecyclerView addressesRecyclerView;
     private AddressAdapter addressAdapter;
     private List<Address> addressList = new ArrayList<>();
     private Button addNewAddressButton;
-    private Toolbar toolbar; // Use Toolbar instead of ImageView for back button
+    private ImageView backButton;
     private TextView noAddressesTextView; // Add the TextView for empty state
-
+    public static final String ACTION_DEFAULT_ADDRESS_CHANGED = "vn.iostar.doan.DEFAULT_ADDRESS_CHANGED";
     private String token;
 
     private ActivityResultLauncher<Intent> addressFormLauncher;
@@ -69,6 +69,9 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
                     if (result.getResultCode() == RESULT_OK) {
                         Log.i(TAG, "Address form activity finished with RESULT_OK. Refreshing address list.");
                         fetchAddresses(authHeader); // Re-fetch the list
+                        defaultAddressChanged = true;
+                        setResult(RESULT_OK); // Báo cho ProfileActivity
+                        sendDefaultAddressChangedBroadcast();
                     } else {
                         Log.i(TAG, "Address form activity finished with non-OK result.");
                     }
@@ -80,7 +83,7 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
     private void AnhXa() {
         addressesRecyclerView = findViewById(R.id.addressesRecyclerView);
         addNewAddressButton = findViewById(R.id.addNewAddressButton);
-        toolbar = findViewById(R.id.toolbar); // Find the Toolbar
+        backButton = findViewById(R.id.backButton);
         noAddressesTextView = findViewById(R.id.noAddressesTextView);
     }
 
@@ -91,7 +94,7 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
     }
 
     private void setupListeners(String authHeader) {
-        toolbar.setNavigationOnClickListener(v -> finish()); // Go back to ProfileActivity
+        backButton.setOnClickListener(v -> finish()); // Go back to ProfileActivity
 
         addNewAddressButton.setOnClickListener(v -> {
             // Navigate to the Add Address Form Activity
@@ -144,9 +147,6 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
             noAddressesTextView.setVisibility(View.GONE);
         }
     }
-
-
-    // --- Implementation of AddressAdapter.OnAddressActionListener ---
 
     @Override
     public void onEditClick(Address address) {
@@ -233,7 +233,10 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
                         if (response.isSuccessful()) {
                             Log.d(TAG, "Address set as default successfully: " + address.getAddressId());
                             Toast.makeText(ShippingAddressActivity.this, "Địa chỉ đã được đặt làm mặc định.", Toast.LENGTH_SHORT).show();
-                            // Refresh the list to update the default indicator
+
+                            defaultAddressChanged = true; // Đặt cờ thành true
+                            setResult(RESULT_OK); // <--- ****** THÊM DÒNG NÀY ******
+                            sendDefaultAddressChangedBroadcast();
                             fetchAddresses(authHeader);
                         } else {
                             Log.e(TAG, "Failed to set address as default. Code: " + response.code());
@@ -252,5 +255,17 @@ public class ShippingAddressActivity extends AppCompatActivity implements Addres
                         Toast.makeText(ShippingAddressActivity.this, "Lỗi kết nối khi đặt mặc định.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+    @Override
+    public void finish() {
+        if (defaultAddressChanged) {
+            setResult(RESULT_OK);
+        }
+        super.finish();
+    }
+    private void sendDefaultAddressChangedBroadcast() {
+        Intent intent = new Intent(ACTION_DEFAULT_ADDRESS_CHANGED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        Log.d(TAG, "Sent ACTION_DEFAULT_ADDRESS_CHANGED broadcast.");
     }
 }

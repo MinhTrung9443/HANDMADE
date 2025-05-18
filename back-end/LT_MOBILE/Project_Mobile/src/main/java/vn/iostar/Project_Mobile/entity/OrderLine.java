@@ -20,6 +20,7 @@ public class OrderLine {
     private long orderLineId;
 
     private int quantity;
+    private double price;
 
     // === THÊM @JsonBackReference VÀ FetchType.LAZY CHO Order ===
     @ManyToOne(fetch = FetchType.LAZY) // <<< Tải trễ Order
@@ -34,6 +35,4 @@ public class OrderLine {
     @JsonIgnoreProperties({"orderLines", "category", /* các trường khác nếu có */ "hibernateLazyInitializer", "handler"})
     private Product product;
 
-    
-     private double price;
-}
+    }

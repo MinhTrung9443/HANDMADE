@@ -324,30 +324,18 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 hasItemSelected = true;
             }
         }
-
-        // Bỏ tính thuế và tổng cuối cùng
-        // double taxes = subtotal * 0.05;
-        // double total = subtotal + taxes;
-
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
-        // Cập nhật TextView "Tạm tính" (trước đây là Total)
         textViewTotalValue.setText(currencyFormat.format(subtotal));
 
-        // Bỏ cập nhật TextView thuế
-        // textViewTaxesValue.setText("+ " + currencyFormat.format(taxes));
-
-        // Cập nhật nút Checkout
         buttonCheckout.setText("Thanh toán (" + selectedItemCount + ")");
         buttonCheckout.setEnabled(hasItemSelected);
 
-        // Cập nhật background nút (có thể giữ nguyên hoặc đơn giản hóa nếu muốn)
         if (hasItemSelected) {
-            buttonCheckout.setBackgroundResource(R.drawable.bottom_nav_background); // Màu nền khi enable
-            // buttonCheckout.setTextColor(getColor(R.color.white)); // Đặt màu chữ nếu cần
-        } else {
             buttonCheckout.setBackgroundResource(R.drawable.bg); // Màu nền khi disable (vd: màu xám)
-            // buttonCheckout.setTextColor(getColor(R.color.grey)); // Đặt màu chữ khi disable nếu cần
+
+        } else {
+            buttonCheckout.setBackgroundResource(R.drawable.bottom_nav_background); // Màu nền khi enable
         }
     }
 

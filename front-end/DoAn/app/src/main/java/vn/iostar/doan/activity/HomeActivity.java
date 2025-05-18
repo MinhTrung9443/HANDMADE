@@ -1,6 +1,9 @@
 package vn.iostar.doan.activity; // Thay thế bằng package name thực tế của bạn
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,9 +14,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,7 +55,9 @@ public class HomeActivity extends AppCompatActivity {
     private SearchView searchView;
     private ViewFlipper viewFlipperMain;
     private ImageView imgUser, ivCart, ivAboutUs, ivLocation, chatBotIcon, ivHome; // Thêm ivHome
-    private TextView tvLocationAddress;
+        private TextView tvLocationAddress;
+    private ActivityResultLauncher<Intent> profileActivityLauncher;
+    private BroadcastReceiver defaultAddressChangeReceiver;
 
     // Khai báo View cho các layout được include
     private View headerLayout;
@@ -62,12 +70,89 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         AnhXa();
+        setupLaunchers();
+        setupBroadcastReceivers();
         loadUserInfoAndInitData();
         setupSearchView();
         setupUserMenu();
         setupBottomNavigation();
     }
+    private void setupLaunchers() {
+        profileActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Log.d(TAG, "ProfileActivity returned RESULT_OK, refreshing user info on Home.");
+                        // loadUserInfoAndInitData(); // Hoặc một phương thức chỉ cập nhật UI người dùng
+                        fetchUserAddressForHeader(); // Gọi phương thức chỉ cập nhật địa chỉ
+                    }
+                }
+        );
+    }
 
+    private void setupBroadcastReceivers() {
+        defaultAddressChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (ShippingAddressActivity.ACTION_DEFAULT_ADDRESS_CHANGED.equals(intent.getAction())) {
+                    Log.d(TAG, "HomeActivity received ACTION_DEFAULT_ADDRESS_CHANGED broadcast, refreshing address.");
+                    fetchUserAddressForHeader(); // Gọi phương thức chỉ cập nhật địa chỉ
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                defaultAddressChangeReceiver,
+                new IntentFilter(ShippingAddressActivity.ACTION_DEFAULT_ADDRESS_CHANGED)
+        );
+    }
+
+
+    // Tách riêng logic lấy và hiển thị địa chỉ để dễ gọi lại
+    private void fetchUserAddressForHeader() {
+        if (this.authToken == null || this.authToken.isEmpty()) {
+            Log.w(TAG, "Auth token is null/empty in fetchUserAddressForHeader. Cannot fetch.");
+            if (tvLocationAddress != null) tvLocationAddress.setText("Lỗi xác thực.");
+            return;
+        }
+        ApiService.apiService.getUserInfo("Bearer " + this.authToken)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            User user = response.body();
+                            List<Address> addresses = user.getAddresses();
+                            Address defaultAddress = null;
+                            if (addresses != null && !addresses.isEmpty()) {
+                                for (Address address : addresses) {
+                                    if (address != null && address.isDefaultAddress()) {
+                                        defaultAddress = address;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (tvLocationAddress != null) {
+                                if (defaultAddress != null) {
+                                    //String fullAddress = defaultAddress.getHouseNumber() + ", " + defaultAddress.getWard() + ", " + defaultAddress.getDistrict() + ", " + defaultAddress.getCity() + ", " + defaultAddress.getCountry();
+                                    String fullAddress = defaultAddress.getHouseNumber() + ", "+
+                                            defaultAddress.getCountry();
+                                    tvLocationAddress.setText(fullAddress);
+                                    Log.d(TAG, "Updated default address on Home: " + fullAddress);
+                                } else {
+                                    tvLocationAddress.setText("Chưa có địa chỉ mặc định.");
+                                }
+                            }
+                        } else {
+                            Log.e(TAG, "Error fetching user info for Home header: " + response.code());
+                            if (tvLocationAddress != null) tvLocationAddress.setText("Lỗi tải địa chỉ.");
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        Log.e(TAG, "API failure fetching user info for Home header", t);
+                        if (tvLocationAddress != null) tvLocationAddress.setText("Lỗi kết nối.");
+                    }
+                });
+    }
     private void AnhXa() {
         // Ánh xạ các thành phần chính (trực tiếp trong activity_home.xml)
         rcCate = findViewById(R.id.rc_category);
@@ -370,7 +455,12 @@ public class HomeActivity extends AppCompatActivity {
                     if (id == R.id.menu_profile) {
                         Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
                         intent.putExtra("token", authToken);
-                        startActivity(intent);
+                        if (profileActivityLauncher != null) {
+                            profileActivityLauncher.launch(intent);
+                        } else {
+                            Log.e(TAG, "profileActivityLauncher is null! Cannot launch ProfileActivity for result.");
+                            startActivity(intent); // Fallback nếu launcher null
+                        }
                         return true;
                     } else if (id == R.id.menu_logout) {
                         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
@@ -390,7 +480,13 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, "imgUser is null! Cannot setup user menu.");
         }
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (defaultAddressChangeReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(defaultAddressChangeReceiver);
+        }
+    }
     private void setupBottomNavigation() {
         // Xử lý click cho icon Home (ivMenuBottom) - Thường ở trang chủ thì không làm gì hoặc cuộn lên đầu
         if (ivHome != null) {

@@ -5,141 +5,142 @@
     android:id="@+id/cartRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@drawable/image_62"
     android:orientation="vertical"
     tools:context=".activity.CartActivity">
 
-    <!-- Toolbar -->
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="Giỏ hàng của bạn"
-            app:titleTextColor="?attr/colorOnPrimary"
-            app:navigationIcon="@drawable/ic_back"
-            app:tint="?attr/colorOnPrimary"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="?attr/actionBarSize"
+        app:layout_collapseMode="pin"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
+    <TextView
+        android:layout_marginTop="10dp"
+        android:paddingStart="20dp"
+        android:text="GIỎ HÀNG CỦA BẠN:"
+        android:textStyle="bold"
+        android:textColor="@color/blue"
+        android:textSize="28dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/> <!-- Giữ nguyên TextView này -->
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+    android:layout_weight="1"
+    android:layout_marginTop="25dp"
+    android:fillViewport="true">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewCartItems"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:paddingBottom="@dimen/padding_medium"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_cart" />
-
-            <!-- TextView Empty Cart -->
-            <TextView
-                android:id="@+id/textViewEmptyCart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="@dimen/padding_large"
-                android:text="Giỏ hàng của bạn đang trống"
-                android:textAppearance="@style/TextAppearance.App.BodyMedium"
-                android:textColor="?attr/colorOnBackground"
-                android:visibility="gone" />
-
-            <!-- Progress Bar -->
-            <ProgressBar
-                android:id="@+id/progressBarCart"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="gone" />
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <!-- Summary Layout -->
     <LinearLayout
-        android:id="@+id/summaryLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        android:orientation="vertical"
-        android:layout_gravity="bottom"
-        android:padding="@dimen/padding_medium"
-        android:elevation="@dimen/card_elevation">
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/checkboxSelectAll"
+        <!-- RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCartItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="1dp"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_cart" />
+
+        <!-- TextView Empty Cart -->
+        <TextView
+            android:id="@+id/textViewEmptyCart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+        android:text="Giỏ hàng của bạn đang trống"
+        android:textColor="#757575"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBarCart"
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="?attr/colorPrimary"
-            android:text="Chọn tất cả"
-            android:textColor="?attr/colorOnSurface"
-            android:textAppearance="@style/TextAppearance.App.LabelLarge"/>
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:layout_marginTop="@dimen/spacing_medium"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:background="@color/divider_color" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textViewTotalLabel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Tạm tính"
-                android:textColor="?attr/colorOnSurface"
-                android:textAppearance="@style/TextAppearance.App.TitleSmall"
-                android:textStyle="bold" />
+    <!-- Summary Layout -->
+<LinearLayout
+android:id="@+id/summaryLayout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+    android:background="#212121"
+    android:orientation="vertical"
+    android:layout_gravity="bottom"
+    android:padding="20dp">
 
-            <TextView
-                android:id="@+id/textViewTotalValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnSurface"
-                android:textAppearance="@style/TextAppearance.App.TitleSmall"
-                android:textStyle="bold"
-                tools:text="0 đ" />
-        </LinearLayout>
+<CheckBox
+android:id="@+id/checkboxSelectAll"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:buttonTint="#EEEEEE"
+android:text="Chọn tất cả"
+android:textColor="#EEEEEE" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonCheckout"
-            style="@style/Widget.App.Button.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="@dimen/spacing_medium"
-            android:layout_marginBottom="0dp"
-            android:layout_gravity="center_horizontal"
-            android:enabled="false"
-            android:text="Thanh toán (0)"
-            android:textAllCaps="false"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"/>
+    <!-- Bỏ LinearLayout chứa Thuế và Phí vận chuyển -->
+    <!-- <LinearLayout ... > ... </LinearLayout> -->
+
+<View
+android:layout_width="match_parent"
+android:layout_height="1dp"
+android:layout_marginTop="16dp"
+android:layout_marginBottom="6dp"
+    android:background="#424242" />
+
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginTop="6dp"
+android:orientation="horizontal">
+
+<TextView
+    android:id="@+id/textViewTotalLabel"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:text="Tạm tính"
+android:textColor="#FFFFFF"
+android:textSize="18sp"
+android:textStyle="bold" />
+
+<TextView
+    android:id="@+id/textViewTotalValue"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#FFFFFF"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    tools:text="0 đ" />
+</LinearLayout>
+
+<androidx.appcompat.widget.AppCompatButton
+android:id="@+id/buttonCheckout"
+android:layout_width="170dp"
+android:layout_height="40dp"
+android:layout_marginTop="16dp"
+    android:layout_marginBottom="10dp"
+    android:layout_gravity="center"
+    android:background="@drawable/bottom_nav_background"
+    android:enabled="false"
+    android:text="Thanh toán (0)"
+    android:textAllCaps="false"
+    android:textColor="#FFFFFF"
+    android:textSize="16sp"
+    android:textStyle="bold" />
     </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+// import java.util.Objects; // Bỏ import nếu không dùng trực tiếp
 import java.util.stream.Collectors;
 
 import okhttp3.Call;
@@ -36,22 +37,24 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import vn.iostar.doan.R; // <<<< Đảm bảo R đúng
-import vn.iostar.doan.activity.OrderDetailActivity;
-import vn.iostar.doan.activity.ProductRatingActivity; // Mặc dù không dùng trực tiếp nhưng để đó nếu cần
+import vn.iostar.doan.R;
+import vn.iostar.doan.activity.OrderDetailActivity; // <<<< QUAN TRỌNG: Import để dùng hằng số
+import vn.iostar.doan.activity.OrderHistoryActivity;
 import vn.iostar.doan.adapter.OrderAdapter;
 import vn.iostar.doan.model.Order;
-import vn.iostar.doan.model.OrderLine; // Cần cho logic API
-import vn.iostar.doan.model.OrderStatus;
-// import vn.iostar.doan.model.Product; // Không dùng trực tiếp ở đây
 
 public class OrderListFragment extends Fragment implements OrderAdapter.OrderInteractionListener {
 
     private static final String TAG = "OrderListFragment";
-    private static final String ARG_USER_ID = "user_id";
-    private static final String ARG_ORDER_STATUS = "order_status";
+    // Sử dụng tên khác cho argument keys để tránh nhầm lẫn với Intent keys
+    private static final String ARG_USER_ID_FRAGMENT = "user_id_arg_for_fragment";
+    private static final String ARG_ORDER_STATUS_FRAGMENT = "order_status_arg_for_fragment";
 
-    public static final String ACTION_SELECT_PRODUCT_FOR_REVIEW = "ACTION_SELECT_PRODUCT_FOR_REVIEW";
+    // KHÔNG CẦN ĐỊNH NGHĨA LẠI HẰNG SỐ Ở ĐÂY
+    // Chúng sẽ được lấy từ OrderDetailActivity.java
+    // public static final String ACTION_MODE_SELECT_PRODUCT_FOR_REVIEW = "ACTION_SELECT_PRODUCT_FOR_REVIEW";
+    // public static final String EXTRA_USER_ID_FOR_REVIEW = "USER_ID_FOR_REVIEW";
+
 
     private RecyclerView recyclerViewOrders;
     private OrderAdapter orderAdapter;
@@ -61,20 +64,19 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
 
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new GsonBuilder()
-            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss") // Đảm bảo khớp với API
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
             .create();
 
-    // Đảm bảo URL này đúng và có thể truy cập từ emulator/thiết bị
     private static final String BASE_URL = "http://10.0.2.2:8080/";
 
-    private Long userId;
-    private String targetStatus; // Trạng thái của Fragment này (vd: "WAITING", "RECEIVED")
+    private Long fragmentUserId; // Đổi tên để rõ ràng là userId của Fragment này
+    private String fragmentTargetStatus;
 
     public static OrderListFragment newInstance(Long userId, String status) {
         OrderListFragment fragment = new OrderListFragment();
         Bundle args = new Bundle();
-        args.putLong(ARG_USER_ID, userId);
-        args.putString(ARG_ORDER_STATUS, status);
+        args.putLong(ARG_USER_ID_FRAGMENT, userId); // Sử dụng key argument đã đổi tên
+        args.putString(ARG_ORDER_STATUS_FRAGMENT, status); // Sử dụng key argument đã đổi tên
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,24 +85,22 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            userId = getArguments().getLong(ARG_USER_ID);
-            targetStatus = getArguments().getString(ARG_ORDER_STATUS);
-            Log.d(TAG, "Fragment created for UserID: " + userId + ", Status: " + targetStatus);
+            fragmentUserId = getArguments().getLong(ARG_USER_ID_FRAGMENT); // Nhận bằng key argument đã đổi tên
+            fragmentTargetStatus = getArguments().getString(ARG_ORDER_STATUS_FRAGMENT); // Nhận bằng key argument đã đổi tên
+            Log.d(TAG, "Fragment created for UserID: " + fragmentUserId + ", Status: " + fragmentTargetStatus);
         } else {
             Log.e(TAG, "Fragment created without required arguments! Using defaults.");
-            // Cân nhắc xử lý lỗi này một cách phù hợp hơn là dùng giá trị mặc định
-            // ví dụ: hiển thị thông báo lỗi và không fetch data.
-            userId = -1L; // Giá trị không hợp lệ
-            targetStatus = "UNKNOWN";
+            fragmentUserId = -1L;
+            fragmentTargetStatus = "UNKNOWN";
         }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Đảm bảo bạn có file layout fragment_order_list.xml
         return inflater.inflate(R.layout.fragment_order_list, container, false);
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -113,10 +113,11 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
 
         setupRecyclerView();
 
-        if (userId != null && userId > 0 && targetStatus != null && !targetStatus.equals("UNKNOWN")) {
-            fetchOrdersWithOkHttp(userId, targetStatus);
+        if (fragmentUserId != null && fragmentUserId > 0 &&
+                fragmentTargetStatus != null && !fragmentTargetStatus.equals("UNKNOWN")) {
+            fetchOrdersWithOkHttp(fragmentUserId, fragmentTargetStatus);
         } else {
-            String errorMsg = "Lỗi cấu hình: Không thể tải danh sách đơn hàng (UserID: " + userId + ", Status: " + targetStatus + ")";
+            String errorMsg = "Lỗi cấu hình Fragment: UserID=" + fragmentUserId + ", Status=" + fragmentTargetStatus;
             Log.e(TAG, errorMsg);
             showError(errorMsg);
         }
@@ -128,29 +129,19 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
             return;
         }
         recyclerViewOrders.setLayoutManager(new LinearLayoutManager(getContext()));
-        // SỬA Ở ĐÂY: TRUYỀN THÊM targetStatus VÀO CONSTRUCTOR CỦA OrderAdapter
-        orderAdapter = new OrderAdapter(getContext(), this, targetStatus);
+        orderAdapter = new OrderAdapter(getContext(), this, fragmentTargetStatus); // Truyền fragmentTargetStatus
         recyclerViewOrders.setAdapter(orderAdapter);
     }
 
-    private void fetchOrdersWithOkHttp(Long currentUserId, final String statusToFilter) {
+    private void fetchOrdersWithOkHttp(Long currentUserIdToFetch, final String statusToFilter) {
         showLoading(true);
-        tvErrorMessage.setVisibility(View.GONE);
-        tvNoOrders.setVisibility(View.GONE);
-        recyclerViewOrders.setVisibility(View.VISIBLE); // Hiển thị lại RecyclerView khi bắt đầu fetch
+        showError(null);
+        showNoOrdersMessage(false);
 
-        // URL này cần được điều chỉnh cho phù hợp với API của bạn
-        // Hiện tại nó lấy TẤT CẢ đơn hàng của user, sau đó lọc ở client.
-        // Lý tưởng hơn là API hỗ trợ lọc theo status: /api/orders/user/{userId}/status/{status}
-        String url = BASE_URL + "api/orders/status/" + currentUserId; // Hoặc URL đúng của bạn
-        Log.d(TAG, "Fetching orders from URL: " + url + " (will filter for status: " + statusToFilter + ")");
+        String url = BASE_URL + "api/orders/status/" + currentUserIdToFetch; // URL bạn đang dùng
+        Log.d(TAG, "Fetching ALL orders for user from URL: " + url + " (will filter for status: " + statusToFilter + " on client-side)");
 
-        // TODO: Thêm Authentication Token nếu API yêu cầu
-        // String authToken = SharedPreferencesUtils.getToken(getContext());
         Request.Builder requestBuilder = new Request.Builder().url(url);
-        // if (authToken != null && !authToken.isEmpty()) {
-        //     requestBuilder.addHeader("Authorization", "Bearer " + authToken);
-        // }
         Request request = requestBuilder.build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -160,7 +151,6 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
                         showLoading(false);
-                        // Chỉ hiển thị lỗi nếu chưa có lỗi nào khác
                         if (tvErrorMessage.getVisibility() == View.GONE && tvNoOrders.getVisibility() == View.GONE) {
                             showError("Lỗi kết nối mạng. Vui lòng thử lại.");
                         }
@@ -170,16 +160,15 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                // Luôn đảm bảo responseBody được đóng
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) {
-                        final String errorMsg = "Lỗi Server: " + response.code() + " " + response.message();
-                        String errorBodyStr = (responseBody != null) ? responseBody.string() : "null"; // Đọc errorBody một lần
+                        final String errorMsg = "Lỗi Server: " + response.code();
+                        String errorBodyStr = (responseBody != null) ? responseBody.string() : "";
                         Log.e(TAG, "OkHttp Fetch onResponse Error: " + errorMsg + ", Body: " + errorBodyStr);
                         if (getActivity() != null && isAdded()) {
                             getActivity().runOnUiThread(() -> {
                                 showLoading(false);
-                                showError("Lỗi " + response.code() + ": Không thể tải dữ liệu.");
+                                showError(errorMsg + ": Không thể tải dữ liệu.");
                             });
                         }
                         return;
@@ -196,10 +185,9 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                         return;
                     }
 
-                    final String responseData = responseBody.string(); // Đọc body một lần
+                    final String responseData = responseBody.string();
                     Log.d(TAG, "OkHttp Fetch onResponse Success JSON (first 500 chars): " + responseData.substring(0, Math.min(responseData.length(), 500)) + "...");
 
-                    // Parse JSON
                     Type listType = new TypeToken<ArrayList<Order>>() {}.getType();
                     final List<Order> allOrders = gson.fromJson(responseData, listType);
 
@@ -214,7 +202,6 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                         return;
                     }
 
-                    // Lọc danh sách đơn hàng theo statusToFilter (không phân biệt hoa thường)
                     List<Order> filteredOrders;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         filteredOrders = allOrders.stream()
@@ -223,33 +210,31 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                                 .collect(Collectors.toList());
                     } else {
                         filteredOrders = new ArrayList<>();
-                        for (Order order : allOrders) {
-                            if (order.getStatus() != null &&
-                                    order.getStatus().name().equalsIgnoreCase(statusToFilter)) {
-                                filteredOrders.add(order);
+                        for (Order orderItem : allOrders) { // Đổi tên biến để tránh trùng
+                            if (orderItem.getStatus() != null &&
+                                    orderItem.getStatus().name().equalsIgnoreCase(statusToFilter)) {
+                                filteredOrders.add(orderItem);
                             }
                         }
                     }
                     Log.d(TAG, "Total orders fetched: " + allOrders.size() + ", Filtered orders for status '" + statusToFilter + "': " + filteredOrders.size());
 
-                    // Cập nhật UI trên Main Thread
                     if (getActivity() != null && isAdded()) {
                         getActivity().runOnUiThread(() -> {
                             showLoading(false);
                             if (filteredOrders.isEmpty()) {
                                 showNoOrdersMessage(true);
-                                if (orderAdapter != null) orderAdapter.setOrders(new ArrayList<>()); // Xóa adapter nếu không có đơn
+                                if (orderAdapter != null) orderAdapter.setOrders(new ArrayList<>());
                             } else {
                                 if (orderAdapter != null) orderAdapter.setOrders(filteredOrders);
-                                showNoOrdersMessage(false); // Ẩn thông báo "ko có đơn" và hiện recycler
+                                showNoOrdersMessage(false);
                             }
-                            showError(null); // Xóa thông báo lỗi nếu có
+                            showError(null);
                         });
                     }
 
                 } catch (JsonSyntaxException e) {
                     Log.e(TAG, "JSON Parsing Error: ", e);
-                    // Không log responseData ở đây vì nó có thể rất lớn.
                     if (getActivity() != null && isAdded()) {
                         getActivity().runOnUiThread(() -> {
                             showLoading(false);
@@ -261,12 +246,12 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                     if (getActivity() != null && isAdded()) {
                         getActivity().runOnUiThread(() -> {
                             showLoading(false);
-                            if (tvErrorMessage.getVisibility() == View.GONE) { // Chỉ hiện lỗi nếu chưa có lỗi khác
+                            if (tvErrorMessage.getVisibility() == View.GONE) {
                                 showError("Lỗi đọc dữ liệu từ server.");
                             }
                         });
                     }
-                } catch (Exception e) { // Bắt các lỗi không mong muốn khác
+                } catch (Exception e) {
                     Log.e(TAG, "Unexpected error in onResponse processing: ", e);
                     if (getActivity() != null && isAdded()) {
                         getActivity().runOnUiThread(() -> {
@@ -281,7 +266,8 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
         });
     }
 
-    private void callCancelOrderApi(long orderIdToCancel) { // Đổi tên tham số để tránh nhầm lẫn
+    private void callCancelOrderApi(long orderIdToCancel) {
+        // ... (Giữ nguyên logic)
         if (!isAdded() || getContext() == null) {
             Log.w(TAG, "Fragment not attached or context is null, cannot call cancel API.");
             return;
@@ -289,14 +275,11 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
         Toast.makeText(requireContext(), "Đang gửi yêu cầu hủy...", Toast.LENGTH_SHORT).show();
         showLoading(true);
 
-        // TODO: Thêm Authentication Token nếu API yêu cầu
-        String url = BASE_URL + "api/orders/" + orderIdToCancel + "/cancel"; // API endpoint để hủy đơn
+        String url = BASE_URL + "api/orders/" + orderIdToCancel + "/cancel";
         Log.d(TAG, "Calling cancel API: " + url);
 
-        // API hủy đơn thường dùng PUT hoặc POST với body rỗng (hoặc có thể cần body)
-        RequestBody emptyBody = RequestBody.create(new byte[0], null); // Body rỗng
-        Request.Builder requestBuilder = new Request.Builder().url(url).put(emptyBody); // Giả sử dùng PUT
-        // Thêm header Auth nếu cần
+        RequestBody emptyBody = RequestBody.create(new byte[0], null);
+        Request.Builder requestBuilder = new Request.Builder().url(url).put(emptyBody);
         Request request = requestBuilder.build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -315,36 +298,31 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (getActivity() != null && isAdded()) {
                     getActivity().runOnUiThread(() -> {
-                        try (ResponseBody responseBody = response.body()) { // Luôn đóng body
+                        try (ResponseBody responseBody = response.body()) {
                             if (response.isSuccessful()) {
                                 Log.d(TAG, "OkHttp Cancel Order Success. Code: " + response.code());
                                 Toast.makeText(requireContext(), "Đã hủy đơn hàng #" + orderIdToCancel, Toast.LENGTH_SHORT).show();
-                                // Tải lại danh sách đơn hàng sau khi hủy thành công
-                                if (userId != null && targetStatus != null && !targetStatus.equals("UNKNOWN")) {
-                                    fetchOrdersWithOkHttp(userId, targetStatus);
+                                if (fragmentUserId != null && fragmentTargetStatus != null && !fragmentTargetStatus.equals("UNKNOWN")) {
+                                    fetchOrdersWithOkHttp(fragmentUserId, fragmentTargetStatus);
                                 } else {
-                                    showLoading(false); // Chỉ ẩn loading nếu không thể refresh
+                                    showLoading(false);
                                 }
                             } else {
                                 String errorMessage = "Hủy đơn thất bại: Mã lỗi " + response.code();
                                 String errorBodyString = null;
                                 if (responseBody != null) {
-                                    try {
-                                        errorBodyString = responseBody.string();
-                                        // Cố gắng parse lỗi cụ thể hơn từ server nếu có
+                                    try { errorBodyString = responseBody.string();
                                         if (errorBodyString != null && !errorBodyString.isEmpty() && !errorBodyString.startsWith("<")) {
                                             errorMessage = "Hủy thất bại: " + errorBodyString.substring(0, Math.min(errorBodyString.length(), 100));
                                         }
-                                    } catch (IOException e) {
-                                        Log.e(TAG, "Error reading error body for cancel", e);
-                                    }
+                                    } catch (IOException ioException) { Log.e(TAG, "Error reading error body for cancel", ioException); }
                                 }
                                 Log.e(TAG, "OkHttp Cancel Order Error: " + errorMessage + (errorBodyString != null ? " (Raw Body: " + errorBodyString + ")" : ""));
                                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
                                 showLoading(false);
                             }
-                        } catch (Exception e) { // Bắt các lỗi không mong muốn khác
-                            Log.e(TAG, "Unexpected error processing cancel response", e);
+                        } catch (Exception exception) { // Catch all other exceptions
+                            Log.e(TAG, "Unexpected error processing cancel response", exception);
                             Toast.makeText(requireContext(), "Lỗi không xác định khi hủy đơn.", Toast.LENGTH_SHORT).show();
                             showLoading(false);
                         }
@@ -354,9 +332,14 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
         });
     }
 
+
     private void showLoading(boolean isLoading) {
         if (!isAdded() || progressBar == null) return;
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        if (isLoading) {
+            if (tvErrorMessage != null) tvErrorMessage.setVisibility(View.GONE);
+            if (tvNoOrders != null) tvNoOrders.setVisibility(View.GONE);
+        }
     }
 
     private void showError(String message) {
@@ -364,29 +347,28 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
         if (message != null && !message.isEmpty()) {
             tvErrorMessage.setText(message);
             tvErrorMessage.setVisibility(View.VISIBLE);
-            recyclerViewOrders.setVisibility(View.GONE); // Ẩn list khi có lỗi
-            tvNoOrders.setVisibility(View.GONE);    // Ẩn thông báo "không có đơn"
+            recyclerViewOrders.setVisibility(View.GONE);
+            tvNoOrders.setVisibility(View.GONE);
         } else {
-            tvErrorMessage.setVisibility(View.GONE); // Xóa thông báo lỗi
-            // Không tự động hiện RecyclerView ở đây, để fetchOrders hoặc showNoOrdersMessage quyết định
+            tvErrorMessage.setVisibility(View.GONE);
         }
     }
 
     private void showNoOrdersMessage(boolean show) {
         if (!isAdded() || tvNoOrders == null || recyclerViewOrders == null || tvErrorMessage == null) return;
         tvNoOrders.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) { // Nếu hiện "không có đơn"
+        if (show) {
             recyclerViewOrders.setVisibility(View.GONE);
-            tvErrorMessage.setVisibility(View.GONE); // Đảm bảo text lỗi cũng ẩn
-        } else { // Nếu không hiện "không có đơn" (tức là có đơn hoặc đang loading/lỗi khác)
-            // Để fetchOrders quyết định việc hiển thị RecyclerView
+            tvErrorMessage.setVisibility(View.GONE);
+        } else {
+            recyclerViewOrders.setVisibility(View.VISIBLE);
         }
     }
 
-    // === IMPLEMENT OrderInteractionListener ===
 
     @Override
     public void onCancelOrderClicked(Order order) {
+        // ... (Giữ nguyên)
         if (!isAdded() || getContext() == null) return;
         Log.d(TAG, "Cancel button clicked for order ID: " + order.getOrderId());
         new AlertDialog.Builder(requireContext())
@@ -394,38 +376,53 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
                 .setMessage("Bạn có chắc chắn muốn hủy đơn hàng #" + order.getOrderId() + " không?")
                 .setPositiveButton("Đồng ý", (dialog, which) -> callCancelOrderApi(order.getOrderId()))
                 .setNegativeButton("Không", (dialog, which) -> dialog.dismiss())
-                .setIcon(android.R.drawable.ic_dialog_alert) // Icon cảnh báo mặc định
+                .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
 
+
     @Override
     public void onReviewOrderClicked(Order order) {
-        if (!isAdded() || getContext() == null) return;
-
-        Log.d(TAG, "Review button clicked for order ID: " + order.getOrderId() + " (Redirecting to OrderDetailActivity for product selection)");
-
-        Intent intent = new Intent(requireContext(), OrderDetailActivity.class);
-        intent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.getOrderId());
-        intent.putExtra("ACTION_MODE", ACTION_SELECT_PRODUCT_FOR_REVIEW); // Truyền cờ action
-
-        if (userId != null && userId > 0) {
-            intent.putExtra("USER_ID_FOR_REVIEW", userId);
-            Log.d(TAG, "Passing USER_ID_FOR_REVIEW: " + userId + " to OrderDetailActivity");
-        } else {
-            Log.e(TAG, "User ID (" + userId + ") is invalid when trying to review order. Cannot proceed.");
-            Toast.makeText(getContext(), "Lỗi: Không thể xác định người dùng.", Toast.LENGTH_SHORT).show();
+        if (!isAdded() || getContext() == null || getActivity() == null) {
+            Log.e(TAG, "Fragment not attached or context/activity is null. Cannot proceed to review.");
             return;
         }
-        startActivity(intent);
+
+        Log.d(TAG, "Review button clicked for Order ID: " + order.getOrderId());
+
+        Intent intentToOrderDetail = new Intent(requireContext(), OrderDetailActivity.class);
+
+        // SỬ DỤNG HẰNG SỐ TỪ OrderDetailActivity.java ĐỂ ĐẢM BẢO NHẤT QUÁN
+        intentToOrderDetail.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.getOrderId());
+        intentToOrderDetail.putExtra(OrderDetailActivity.EXTRA_ACTION_MODE, OrderDetailActivity.ACTION_MODE_SELECT_PRODUCT_FOR_REVIEW);
+
+        if (fragmentUserId != null && fragmentUserId > 0) { // Sử dụng fragmentUserId đã đổi tên
+            intentToOrderDetail.putExtra(OrderDetailActivity.EXTRA_USER_ID_FOR_REVIEW, fragmentUserId); // Sử dụng fragmentUserId
+            Log.d(TAG, "Passing " + OrderDetailActivity.EXTRA_USER_ID_FOR_REVIEW + ": " + fragmentUserId +
+                    " with Key " + OrderDetailActivity.EXTRA_ACTION_MODE + " = " + OrderDetailActivity.ACTION_MODE_SELECT_PRODUCT_FOR_REVIEW +
+                    " to OrderDetailActivity for OrderID: " + order.getOrderId());
+        } else {
+            Log.e(TAG, "FragmentUserId (" + fragmentUserId + ") is invalid when trying to review order.");
+            Toast.makeText(getContext(), "Lỗi: Không thể xác định người dùng để đánh giá.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (getActivity() instanceof OrderHistoryActivity) {
+            ((OrderHistoryActivity) getActivity()).launchReviewActivity(intentToOrderDetail);
+        } else {
+            Log.e(TAG, "Parent activity is not OrderHistoryActivity. Launching OrderDetailActivity directly.");
+            startActivity(intentToOrderDetail);
+        }
     }
+
 
     @Override
     public void onRepurchaseOrderClicked(Order order) {
+        // ... (Giữ nguyên)
         if (!isAdded() || getContext() == null) return;
         Log.d(TAG, "Repurchase button clicked for order ID: " + order.getOrderId());
-        // TODO: Implement logic mua lại sản phẩm (thêm vào giỏ hàng, etc.)
         if (order.getOrderLines() != null && !order.getOrderLines().isEmpty()) {
-            Toast.makeText(requireContext(), "Chức năng Mua lại đang được phát triển", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Chức năng Mua lại đang được phát triển.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(requireContext(), "Không có sản phẩm trong đơn hàng này để mua lại.", Toast.LENGTH_SHORT).show();
         }
@@ -433,11 +430,19 @@ public class OrderListFragment extends Fragment implements OrderAdapter.OrderInt
 
     @Override
     public void onViewDetailsClicked(Order order) {
+        // ... (Giữ nguyên)
         if (!isAdded() || getContext() == null) return;
         Log.d(TAG, "View Details button clicked for order ID: " + order.getOrderId());
         Intent intent = new Intent(requireContext(), OrderDetailActivity.class);
-        // Chỉ truyền orderId, không truyền action mode cho xem chi tiết thông thường
         intent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.getOrderId());
         startActivity(intent);
+    }
+
+    public void refreshOrders() {
+        Log.d(TAG, "refreshOrders called for status: " + fragmentTargetStatus); // Sử dụng fragmentTargetStatus
+        if (fragmentUserId != null && fragmentUserId > 0 && // Sử dụng fragmentUserId
+                fragmentTargetStatus != null && !fragmentTargetStatus.equals("UNKNOWN") && isAdded()) {
+            fetchOrdersWithOkHttp(fragmentUserId, fragmentTargetStatus); // Sử dụng fragmentUserId
+        }
     }
 }

@@ -37,6 +37,18 @@ public class UserServiceImpl implements IUserService { // Đảm bảo implement
             throw new RuntimeException("Không tìm thấy người dùng với email: " + email);
         }
     }
+    @Override
+    public Optional<User> findByUserIdentifier(String identifier) {
+        // Logic ở đây sẽ phụ thuộc vào 'identifier' là gì.
+        // Ví dụ: Nếu 'identifier' là email của người dùng:
+        return userRepository.findByEmail(identifier); // Bạn cần có phương thức findByEmail trong IUserRepository
+
+        // Ví dụ: Nếu 'identifier' là username của người dùng:
+        // return userRepository.findByUsername(identifier); // Bạn cần có phương thức findByUsername
+
+        // Nếu identifier có thể là email hoặc username, bạn có thể cần logic phức tạp hơn
+        // hoặc hai phương thức riêng biệt.
+    }
 
     @Override
     public void saveUser(User user, String otp) {
@@ -74,13 +86,13 @@ public class UserServiceImpl implements IUserService { // Đảm bảo implement
         return user.getOtpCode() != null && user.getOtpCode().equals(otp) && user.getOtpExpiration().isAfter(LocalDateTime.now());
     }
 
+   
     @Override
-    public boolean resetPassword(String email, String newPassword) {
+    public boolean resetPassword(String email, String newPassword) { // newPassword ở đây giờ là plain text
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // LUÔN MÃ HÓA MẬT KHẨU MỚI TRƯỚC KHI LƯU
-            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setPassword(passwordEncoder.encode(newPassword)); // Mật khẩu được mã hóa MỘT LẦN ở đây
             user.setOtpCode(null);
             user.setOtpExpiration(null);
             userRepository.save(user);

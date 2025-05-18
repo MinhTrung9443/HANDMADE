@@ -4,18 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/Widget.App.CardView"
-    android:layout_marginBottom="@dimen/margin_small"
-    android:layout_marginStart="0dp"
-    android:layout_marginEnd="0dp"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation">
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/padding_medium">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,8 +26,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textAppearance="@style/TextAppearance.App.BodyMedium"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="John Doe | 0123456789" />
 
@@ -38,15 +36,15 @@
                 android:id="@+id/textViewDefaultIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_small"
+                android:layout_marginStart="8dp"
                 android:background="@drawable/ic_location_default"
-                android:paddingStart="@dimen/spacing_small"
-                android:paddingTop="@dimen/spacing_micro"
-                android:paddingEnd="@dimen/spacing_small"
-                android:paddingBottom="@dimen/spacing_micro"
+                android:paddingStart="8dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="2dp"
                 android:text="Mặc định"
-                android:textAppearance="@style/TextAppearance.App.LabelSmall"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -56,47 +54,47 @@
             android:id="@+id/textViewFullAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_micro"
-            android:textAppearance="@style/TextAppearance.App.BodySmall"
-            android:textColor="?attr/colorOnSurface"
+            android:layout_marginTop="4dp"
+            android:textColor="#444444"
+            android:textSize="14sp"
             tools:text="123 Main St, Anytown, State, Country" />
 
-        <!-- Action Buttons -->
+        <!-- Action Buttons/Icons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_medium"
+            android:layout_marginTop="12dp"
             android:gravity="end"
             android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/buttonSetDefault"
-                style="@style/Widget.App.Button.Text"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thiết lập mặc định"
-                android:textColor="?attr/colorPrimary"
-                android:textAppearance="@style/TextAppearance.App.LabelSmall"/>
+                android:textColor="#007BFF"
+                android:textSize="12sp" />
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/buttonEditAddress"
-                style="@style/Widget.App.Button.Text"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Chỉnh sửa"
-                android:textColor="?attr/colorPrimary"
-                android:textAppearance="@style/TextAppearance.App.LabelSmall"
-                android:layout_marginStart="@dimen/spacing_small"/>
+                android:textColor="#007BFF"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"/>
 
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/buttonDeleteAddress"
-                style="@style/Widget.App.Button.Text"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Xóa"
-                android:textColor="?attr/colorError"
-                android:textAppearance="@style/TextAppearance.App.LabelSmall"
-                android:layout_marginStart="@dimen/spacing_small"/>
+                android:textColor="#DC3545"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"/>
 
         </LinearLayout>
 

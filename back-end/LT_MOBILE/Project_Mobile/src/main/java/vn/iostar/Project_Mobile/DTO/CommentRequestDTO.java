@@ -31,4 +31,5 @@ public class CommentRequestDTO {
     private Long productId;
 
     private String avatar; // Nếu client cũng gửi avatar cho comment
+    private Long orderId;
 }

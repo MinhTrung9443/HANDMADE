@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground"
+    android:background="#F5F5DC"
     tools:context=".activity.OrderHistoryActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -18,22 +18,21 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:title="Theo dõi đơn hàng"
-            app:titleTextColor="?attr/colorOnPrimary"
-            app:navigationIcon="@drawable/ic_back"
-            app:tint="?attr/colorOnPrimary"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            android:backgroundTint="@color/black"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Theo dõi đơn hàng" /> <!-- Đặt tiêu đề mặc định -->
+
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable"
-            app:tabIndicatorColor="?attr/colorSecondary"
-            app:tabSelectedTextColor="?attr/colorSecondary"
-            app:tabTextColor="?attr/colorOnPrimary" />
+            app:tabMode="scrollable" /> <!-- 'scrollable' là ổn nếu có nhiều tab. Nếu ít (2-4 tab), cân nhắc 'fixed' -->
+        <!-- Nếu dùng 'fixed', có thể thêm: app:tabGravity="fill" -->
 
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"

@@ -17,12 +17,11 @@ public class OrderSuccessActivity extends AppCompatActivity {
 
     private Button btnTrackOrder, btnBackHome;
     private TextView tvSuccessMessage;
-    private String orderId; // Để lưu mã đơn hàng nếu cần cho việc theo dõi
+    private String orderId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // EdgeToEdge.enable(this); // Bật nếu bạn dùng SDK mới và muốn giao diện tràn viền
         setContentView(R.layout.activity_success_order);
 
         // Lấy orderId từ Intent (nếu bạn truyền nó từ OrderActivity)
@@ -30,9 +29,8 @@ public class OrderSuccessActivity extends AppCompatActivity {
 
         btnTrackOrder = findViewById(R.id.btn_track_order);
         btnBackHome = findViewById(R.id.btn_backHome);
-        tvSuccessMessage = findViewById(R.id.btn_track_order); // Lấy TextView nếu muốn hiển thị mã đơn
+        tvSuccessMessage = findViewById(R.id.btn_track_order);
 
-        // (Tùy chọn) Hiển thị mã đơn hàng trên TextView
         if (orderId != null && !orderId.isEmpty()) {
             tvSuccessMessage.setText("Đặt hàng thành công!\nMã đơn: " + orderId);
         } else {
@@ -40,7 +38,6 @@ public class OrderSuccessActivity extends AppCompatActivity {
         }
 
 
-        // Xử lý sự kiện nút "Theo dõi đơn hàng"
         btnTrackOrder.setOnClickListener(v -> {
             // TODO: Chuyển đến màn hình lịch sử đơn hàng hoặc chi tiết đơn hàng
             // Ví dụ: Chuyển đến OrderHistoryActivity và truyền orderId nếu cần

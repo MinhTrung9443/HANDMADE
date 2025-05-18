@@ -51,7 +51,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
         holder.textViewRecipientNameAndPhone.setText(
                 String.format("%s | %s", address.getFullName(), address.getPhone())
         );
-        holder.textViewFullAddress.setText(address.getFullAddressString());
+        holder.textViewFullAddress.setText(address.getHouseNumber());
 
         // Show/hide default indicator
         holder.textViewDefaultIndicator.setVisibility(

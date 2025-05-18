@@ -5,159 +5,157 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/image_51"> <!-- Keep background image for now -->
+    android:background="@drawable/image_51">
 
 
-    <!-- Login Content Card -->
+    <!-- Phần chứa nội dung đăng nhập -->
     <androidx.cardview.widget.CardView
         android:id="@+id/loginContainer"
-        style="@style/Widget.App.CardView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/margin_medium"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:layout_marginBottom="0dp"
+        android:layout_marginTop="16dp"
         app:cardCornerRadius="40dp"
+        app:cardBackgroundColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_weight="2">
+        app:layout_constraintVertical_weight="2"> <!-- Có thể điều chỉnh weight này -->
 
+        <!-- SỬA ĐỔI: Thêm NestedScrollView -->
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:fillViewport="true"> <!-- Quan trọng: cho phép LinearLayout bên trong chiếm toàn bộ không gian nếu cần -->
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/padding_large">
+            android:orientation="vertical"
+            android:padding="24dp">
 
-                <!-- Logo -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MANJHA"
-                    android:textAppearance="@style/TextAppearance.App.TitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+            <!-- Logo -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MANJHA"
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"/>
 
-                <!-- Title -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Khám phá những hàng thủ công mỹ nghệ ở Việt Nam"
-                    android:textAppearance="@style/TextAppearance.App.BodyMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="italic"
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingTop="@dimen/spacing_small" />
+            <!-- Tiêu đề -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Khám phá những hàng thủ công mỹ nghệ ở Việt Nam"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="italic"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="8dp" />
 
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/divider_height"
-                    android:background="@color/divider_color"
-                    android:layout_marginTop="@dimen/spacing_medium"
-                    android:layout_marginBottom="@dimen/spacing_medium"/>
+            <!-- Đường kẻ ngang -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray"
+                android:layout_marginVertical="12dp"/>
 
-                <!-- Email Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/etUsername"
-                    style="@style/Widget.App.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Email"
-                        android:textColor="?attr/colorOnSurface"
-                        android:text="hnhung@example.com"
-                        android:inputType="textEmailAddress"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Password Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/etPassword"
-                    style="@style/Widget.App.TextInputLayout.OutlinedBox"
+            <!-- Nhập email -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etUsername"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/gray"
+                app:boxStrokeColor="@color/white"
+                app:hintTextColor="@color/white">
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_small"
-                    app:passwordToggleEnabled="true"
-                    app:passwordToggleTint="?attr/colorOnSurface">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Password"
-                        android:textColor="?attr/colorOnSurface"
-                        android:text="123"
-                        android:inputType="textPassword"/>
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:hint="Email"
+                    android:textColor="@color/white"
+                    android:text="hnhung@example.com"
+                    android:inputType="textEmailAddress"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Forgot Password -->
-                <TextView
-                    android:id="@+id/txtForget"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Forgot password?"
-                    android:textAppearance="@style/TextAppearance.App.LabelMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_gravity="end"
-                    android:paddingTop="@dimen/spacing_micro"/>
-
-                <!-- Login Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLogin"
-                    style="@style/Widget.App.Button.Primary"
+            <!-- Nhập mật khẩu -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColorHint="@color/gray"
+                app:boxStrokeColor="@color/white"
+                app:hintTextColor="@color/white"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/white">
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="LOGIN"
-                    android:layout_marginTop="@dimen/spacing_medium"/>
+                    android:hint="Password"
+                    android:textColor="@color/white"
+                    android:text="123"
+                    android:inputType="textPassword"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Or sign in with -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Or sign in with"
-                    android:textAppearance="@style/TextAppearance.App.LabelMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingTop="@dimen/spacing_medium"/>
+            <!-- Quên mật khẩu -->
+            <TextView
+                android:id="@+id/txtForget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forgot password?"
+                android:textSize="14sp"
+                android:textColor="@color/gray"
+                android:layout_gravity="end"
+                android:paddingTop="4dp"/>
 
-                <!-- Google Sign-In Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGoogleSignIn"
-                    style="@style/Widget.Material3.Button.TextButton.Icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="@dimen/spacing_small"
-                    android:text="Sign in with Google"
-                    android:textColor="?attr/colorOnSurface"
-                    app:icon="@drawable/ic_google"
-                    app:iconTint="?attr/colorOnSurface"
-                    app:iconGravity="textStart"
-                    app:iconPadding="@dimen/spacing_small"/>
+            <!-- Nút đăng nhập -->
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="LOGIN"
+                android:textSize="16sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp"/>
 
-                <!-- Sign Up -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/tvRegister"
-                    style="@style/Widget.App.Button.Text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Don't have an account? Sign Up"
-                    android:textColor="?attr/colorPrimary"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingTop="@dimen/spacing_medium"
-                    android:layout_marginBottom="@dimen/margin_medium"/>
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
-    </androidx.cardview.widget.CardView>
+            <!-- Đăng nhập với Google -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Or sign in with"
+                android:textSize="14sp"
+                android:textColor="@color/gray"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="12dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Icon Google -->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_google"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="8dp"/>
+
+            <!-- Đăng ký tài khoản -->
+            <TextView
+                android:id="@+id/tvRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don't have an account? Sign Up"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="16dp"
+                android:layout_marginBottom="16dp"/> <!-- Thêm margin bottom để có khoảng trống khi cuộn xuống cuối -->
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

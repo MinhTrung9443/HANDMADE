@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns; // Cho getOriginalFileName
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import java.io.ByteArrayOutputStream;
@@ -55,7 +57,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private String currentAvatarUrl, token;
     private Uri selectedImageUri = null;
     private String uploadedAvatarUrl = null; // Lưu URL sau khi upload thành công
-
+    private Toolbar toolbar;
     // --- ActivityResultLaunchers ---
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -85,6 +87,13 @@ public class EditProfileActivity extends AppCompatActivity {
         ivAvatar = findViewById(R.id.editAvatarImageView);
         saveProfileButton = findViewById(R.id.saveProfileButton);
         progressBar = findViewById(R.id.progressBar);
+        toolbar = findViewById(R.id.toolbarEditProfile);
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -222,7 +231,14 @@ public class EditProfileActivity extends AppCompatActivity {
                     }
                 });
     }
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Close activity
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
     // --- Hàm Cập Nhật Profile (Gửi JSON) ---
     private void callUpdateProfileApi(String fullName, String phone, String avatarUrlToSend) {
         // Tạo DTO Request

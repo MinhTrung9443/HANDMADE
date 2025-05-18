@@ -47,5 +47,11 @@ public class Comment {
     @JoinColumn(name = "productId", nullable = false)
     @JsonIgnore
     private Product product;
+    
+    private boolean reviewed = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id") // Liên kết đến đơn hàng
+    @JsonIgnore
+    private Order order;
 
 }
