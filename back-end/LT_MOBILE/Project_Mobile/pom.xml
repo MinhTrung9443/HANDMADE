@@ -16,7 +16,7 @@
 	<name>Project_Mobile</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>20</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -98,6 +98,24 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.33</version> <!-- Hoặc kiểm tra phiên bản mới nhất -->
 			<scope>runtime</scope>
+		</dependency>
+		<!-- H2 Database để chạy unit test -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Mockito core cho unit testing -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Mockito JUnit 5 Extension -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
