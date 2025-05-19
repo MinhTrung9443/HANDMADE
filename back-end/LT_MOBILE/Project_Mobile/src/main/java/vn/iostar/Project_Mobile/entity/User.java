@@ -18,7 +18,7 @@ import vn.iostar.Project_Mobile.util.Type;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "User")
+@Table(name = "`User`")
 @ToString
 public class User {
 

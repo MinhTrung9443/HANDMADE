@@ -23,7 +23,6 @@ public class TestPassword {
     @Test
     void testBcryptHashing() {
         String plainPassword = "123";
-
         // Sử dụng System.out.println thay vì logger.info
         System.out.println("--- Bắt đầu Test Băm Mật Khẩu ---");
 
